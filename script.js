@@ -9,9 +9,62 @@ let panelTimer = null;
 const GLOBAL_NOTICE_ENDPOINT = window.GLOBAL_NOTICE_API_URL || '/api/global-notice';
 const GLOBAL_NOTICE_POLL_MS = 30000;
 const LAST_NOTICE_CACHE_KEY = 'last-global-notice-payload';
+const NOTICE_DISMISS_DELAY_MS = 3000;
 let dismissedNoticeSignature = null;
 let currentNoticeSignature = null;
 let dismissedNoticeMessage = '';
+let shownNoticeSignature = null;
+let noticeDismissUnlockAt = 0;
+let noticeDismissInterval = null;
+
+function resetNoticeDismissButton() {
+    if (!globalNoticeDismiss) {
+        return;
+    }
+
+    globalNoticeDismiss.disabled = false;
+    globalNoticeDismiss.textContent = 'Close';
+}
+
+function stopNoticeDismissTimer() {
+    if (noticeDismissInterval) {
+        window.clearInterval(noticeDismissInterval);
+        noticeDismissInterval = null;
+    }
+    noticeDismissUnlockAt = 0;
+    resetNoticeDismissButton();
+}
+
+function startNoticeDismissTimer() {
+    if (!globalNoticeDismiss) {
+        return;
+    }
+
+    if (noticeDismissInterval) {
+        window.clearInterval(noticeDismissInterval);
+    }
+
+    noticeDismissUnlockAt = Date.now() + NOTICE_DISMISS_DELAY_MS;
+    globalNoticeDismiss.disabled = true;
+
+    const tick = () => {
+        const remainingMs = Math.max(0, noticeDismissUnlockAt - Date.now());
+        if (remainingMs === 0) {
+            stopNoticeDismissTimer();
+            return;
+        }
+
+        const remainingSeconds = Math.ceil(remainingMs / 1000);
+        globalNoticeDismiss.textContent = `Close (${remainingSeconds}s)`;
+    };
+
+    tick();
+    noticeDismissInterval = window.setInterval(tick, 120);
+}
+
+function canDismissNoticeNow() {
+    return Date.now() >= noticeDismissUnlockAt;
+}
 
 function readCachedNotice() {
     try {
@@ -213,7 +266,14 @@ function renderGlobalNotice(payload) {
         globalNoticeOverlay.classList.remove('visible');
         globalNoticeOverlay.setAttribute('aria-hidden', 'true');
         globalNoticeText.textContent = '';
+        shownNoticeSignature = null;
+        stopNoticeDismissTimer();
         return;
+    }
+
+    if (shownNoticeSignature !== signature || !globalNoticeOverlay.classList.contains('visible')) {
+        shownNoticeSignature = signature;
+        startNoticeDismissTimer();
     }
 
     globalNoticeText.textContent = message;
@@ -222,12 +282,18 @@ function renderGlobalNotice(payload) {
 }
 
 function dismissCurrentGlobalNotice() {
+    if (!canDismissNoticeNow()) {
+        return;
+    }
+
     dismissedNoticeSignature = currentNoticeSignature;
     dismissedNoticeMessage = globalNoticeText?.textContent?.trim() || '';
     if (globalNoticeOverlay) {
         globalNoticeOverlay.classList.remove('visible');
         globalNoticeOverlay.setAttribute('aria-hidden', 'true');
     }
+    shownNoticeSignature = null;
+    stopNoticeDismissTimer();
 }
 
 async function fetchGlobalNotice({ silent = false } = {}) {
