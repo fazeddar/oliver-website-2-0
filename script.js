@@ -204,20 +204,26 @@ const proxyWindowFrame = document.getElementById('proxyWindowFrame');
 function resolveProxyUrl() {
     const explicit = window.SCRAMJET_PROXY_URL || window.PROXY_APP_URL;
     if (typeof explicit === 'string' && explicit.trim()) {
+        console.log('[Proxy] Using explicit URL from window:', explicit.trim());
         return explicit.trim();
     }
 
     if (location.protocol === 'http:' || location.protocol === 'https:') {
         if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            console.log('[Proxy] Local development detected, using http://localhost:8080/');
             return 'http://localhost:8080/';
         }
-        return new URL('/uv/', location.origin).toString();
+        const url = new URL('/uv/', location.origin).toString();
+        console.log('[Proxy] Production URL resolved to:', url, '(from origin:', location.origin, ')');
+        return url;
     }
 
+    console.warn('[Proxy] Unsupported protocol:', location.protocol);
     return 'http://localhost:8080/';
 }
 
 const SCRAMJET_PROXY_URL = resolveProxyUrl();
+console.log('[Proxy] SCRAMJET_PROXY_URL initialized as:', SCRAMJET_PROXY_URL);
 let lastScrollY = window.scrollY;
 let appearanceCloseTimer = null;
 let partnersDrag = null;
@@ -494,6 +500,7 @@ function openGamesWindow() {
 }
 
 function setProxyError(msg) {
+    console.error('[Proxy] Error:', msg);
     if (!proxyWindowFrame) return;
     proxyWindowFrame.src = 'about:blank';
     const body = proxyWindowFrame.closest('.proxy-window-body');
@@ -514,6 +521,7 @@ function clearProxyError() {
 }
 
 function openProxyWindow() {
+    console.log('[Proxy] openProxyWindow called');
     if (location.protocol === 'file:') {
         proxyOverlay?.classList.add('visible');
         proxyOverlay?.setAttribute('aria-hidden', 'false');
@@ -523,8 +531,13 @@ function openProxyWindow() {
 
     if (proxyWindowFrame && proxyWindowFrame.src !== SCRAMJET_PROXY_URL) {
         clearProxyError();
+        console.log('[Proxy] Setting iframe src to:', SCRAMJET_PROXY_URL);
         proxyWindowFrame.src = SCRAMJET_PROXY_URL;
-        proxyWindowFrame.onerror = () => setProxyError(`Could not reach the proxy server at ${SCRAMJET_PROXY_URL}.`);
+        proxyWindowFrame.onerror = () => {
+            console.error('[Proxy] iframe onerror fired');
+            setProxyError(`Could not reach the proxy server at ${SCRAMJET_PROXY_URL}.`);
+        };
+        proxyWindowFrame.onload = () => console.log('[Proxy] iframe loaded successfully');
     }
 
     proxyOverlay?.classList.add('visible');
