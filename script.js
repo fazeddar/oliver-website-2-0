@@ -168,7 +168,6 @@ const appearanceView = document.getElementById('appearanceView');
 const appearanceBackBtn = document.getElementById('appearanceBackBtn');
 const partnersDockBtn = document.getElementById('partnersDockBtn');
 const gamesDockBtn = document.getElementById('gamesDockBtn');
-const internetDockBtn = document.getElementById('internetDockBtn');
 const updatesDockBtn = document.getElementById('updatesDockBtn');
 const partnersOverlay = document.getElementById('partnersOverlay');
 const partnersWindow = document.getElementById('partnersWindow');
@@ -193,37 +192,6 @@ const gamesWindowResize = document.getElementById('gamesWindowResize');
 const gamesWindowBody = document.getElementById('gamesWindowBody');
 const gamesPreviewFrame = document.getElementById('gamesPreviewFrame');
 const gamesMenuButtons = Array.from(document.querySelectorAll('.games-menu-button[data-target]'));
-const proxyOverlay = document.getElementById('proxyOverlay');
-const proxyWindow = document.getElementById('proxyWindow');
-const proxyWindowHeader = document.getElementById('proxyWindowHeader');
-const proxyWindowClose = document.getElementById('proxyWindowClose');
-const proxyHomeBtn = document.getElementById('proxyHomeBtn');
-const proxyReloadBtn = document.getElementById('proxyReloadBtn');
-const proxyWindowResize = document.getElementById('proxyWindowResize');
-const proxyWindowFrame = document.getElementById('proxyWindowFrame');
-function resolveProxyUrl() {
-    const explicit = window.SCRAMJET_PROXY_URL || window.PROXY_APP_URL;
-    if (typeof explicit === 'string' && explicit.trim()) {
-        console.log('[Proxy] Using explicit URL from window:', explicit.trim());
-        return explicit.trim();
-    }
-
-    if (location.protocol === 'http:' || location.protocol === 'https:') {
-        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-            console.log('[Proxy] Local development detected, using http://localhost:8080/');
-            return 'http://localhost:8080/';
-        }
-        const url = new URL('/uv/', location.origin).toString();
-        console.log('[Proxy] Production URL resolved to:', url, '(from origin:', location.origin, ')');
-        return url;
-    }
-
-    console.warn('[Proxy] Unsupported protocol:', location.protocol);
-    return 'http://localhost:8080/';
-}
-
-const SCRAMJET_PROXY_URL = resolveProxyUrl();
-console.log('[Proxy] SCRAMJET_PROXY_URL initialized as:', SCRAMJET_PROXY_URL);
 let lastScrollY = window.scrollY;
 let appearanceCloseTimer = null;
 let partnersDrag = null;
@@ -232,8 +200,6 @@ let updatesDrag = null;
 let updatesResize = null;
 let gamesDrag = null;
 let gamesResize = null;
-let proxyDrag = null;
-let proxyResize = null;
 let verifiedNoticePassword = '';
 
 function setNoticeStatus(target, text, tone = '') {
@@ -499,83 +465,6 @@ function openGamesWindow() {
     updateGamesBackButtonVisibility();
 }
 
-function setProxyError(msg) {
-    console.error('[Proxy] Error:', msg);
-    if (!proxyWindowFrame) return;
-    proxyWindowFrame.src = 'about:blank';
-    const body = proxyWindowFrame.closest('.proxy-window-body');
-    if (!body) return;
-    let err = body.querySelector('.proxy-error-msg');
-    if (!err) {
-        err = document.createElement('div');
-        err.className = 'proxy-error-msg';
-        body.appendChild(err);
-    }
-    err.textContent = msg;
-    err.style.display = 'flex';
-}
-
-function clearProxyError() {
-    const err = proxyWindowFrame?.closest('.proxy-window-body')?.querySelector('.proxy-error-msg');
-    if (err) err.style.display = 'none';
-}
-
-function openProxyWindow() {
-    console.log('[Proxy] openProxyWindow called');
-    if (location.protocol === 'file:') {
-        proxyOverlay?.classList.add('visible');
-        proxyOverlay?.setAttribute('aria-hidden', 'false');
-        setProxyError('This proxy cannot run from file://. Host this website over HTTPS/HTTP and run the proxy backend on the configured URL.');
-        return;
-    }
-
-    if (proxyWindowFrame && proxyWindowFrame.src !== SCRAMJET_PROXY_URL) {
-        clearProxyError();
-        console.log('[Proxy] Setting iframe src to:', SCRAMJET_PROXY_URL);
-        proxyWindowFrame.src = SCRAMJET_PROXY_URL;
-        proxyWindowFrame.onerror = () => {
-            console.error('[Proxy] iframe onerror fired');
-            setProxyError(`Could not reach the proxy server at ${SCRAMJET_PROXY_URL}.`);
-        };
-        proxyWindowFrame.onload = () => console.log('[Proxy] iframe loaded successfully');
-    }
-
-    proxyOverlay?.classList.add('visible');
-    proxyOverlay?.setAttribute('aria-hidden', 'false');
-}
-
-function showProxyHome() {
-    if (!proxyWindowFrame) {
-        return;
-    }
-
-    clearProxyError();
-    proxyWindowFrame.src = SCRAMJET_PROXY_URL;
-}
-
-function reloadProxyPage() {
-    if (!proxyWindowFrame) {
-        return;
-    }
-
-    if (!proxyWindowFrame.src || proxyWindowFrame.src === 'about:blank') {
-        clearProxyError();
-        proxyWindowFrame.src = SCRAMJET_PROXY_URL;
-        return;
-    }
-
-    try {
-        proxyWindowFrame.contentWindow?.location.reload();
-    } catch {
-        proxyWindowFrame.src = proxyWindowFrame.src;
-    }
-}
-
-function closeProxyWindow() {
-    proxyOverlay?.classList.remove('visible');
-    proxyOverlay?.setAttribute('aria-hidden', 'true');
-}
-
 function openGameFromButton(gameButton) {
     if (!gameButton || !gamesPreviewFrame || !gamesWindowBody) {
         return;
@@ -732,14 +621,10 @@ function updateActiveGamesMenuButton() {
 partnersDockBtn?.addEventListener('click', openPartnersWindow);
 partnersWindowClose?.addEventListener('click', closePartnersWindow);
 gamesDockBtn?.addEventListener('click', openGamesWindow);
-internetDockBtn?.addEventListener('click', openProxyWindow);
 updatesDockBtn?.addEventListener('click', openUpdatesWindow);
 gamesRandomBtn?.addEventListener('click', openRandomGame);
 gamesWindowBack?.addEventListener('click', showGamesHome);
 gamesWindowClose?.addEventListener('click', closeGamesWindow);
-proxyWindowClose?.addEventListener('click', closeProxyWindow);
-proxyHomeBtn?.addEventListener('click', showProxyHome);
-proxyReloadBtn?.addEventListener('click', reloadProxyPage);
 updatesWindowClose?.addEventListener('click', closeUpdatesWindow);
 
 partnersOverlay?.addEventListener('click', event => {
@@ -757,12 +642,6 @@ updatesOverlay?.addEventListener('click', event => {
 gamesOverlay?.addEventListener('click', event => {
     if (event.target === gamesOverlay) {
         closeGamesWindow();
-    }
-});
-
-proxyOverlay?.addEventListener('click', event => {
-    if (event.target === proxyOverlay) {
-        closeProxyWindow();
     }
 });
 
@@ -924,43 +803,6 @@ gamesWindowResize?.addEventListener('pointerdown', event => {
     event.stopPropagation();
 });
 
-proxyWindowHeader?.addEventListener('pointerdown', event => {
-    const pressedButton = event.target instanceof Element ? event.target.closest('button') : null;
-    if (!proxyWindow || pressedButton) {
-        return;
-    }
-
-    const rect = proxyWindow.getBoundingClientRect();
-    proxyDrag = {
-        startX: event.clientX,
-        startY: event.clientY,
-        left: rect.left,
-        top: rect.top,
-    };
-
-    proxyWindow.style.left = `${rect.left}px`;
-    proxyWindow.style.top = `${rect.top}px`;
-    proxyWindow.style.transform = 'none';
-    proxyWindowHeader.setPointerCapture(event.pointerId);
-});
-
-proxyWindowResize?.addEventListener('pointerdown', event => {
-    if (!proxyWindow) {
-        return;
-    }
-
-    const rect = proxyWindow.getBoundingClientRect();
-    proxyResize = {
-        startX: event.clientX,
-        startY: event.clientY,
-        width: rect.width,
-        height: rect.height,
-    };
-
-    proxyWindowResize.setPointerCapture(event.pointerId);
-    event.stopPropagation();
-});
-
 window.addEventListener('pointermove', event => {
     if (partnersDrag && partnersWindow) {
         const dx = event.clientX - partnersDrag.startX;
@@ -1021,26 +863,6 @@ window.addEventListener('pointermove', event => {
         gamesWindow.style.width = `${newWidth}px`;
         gamesWindow.style.height = `${newHeight}px`;
     }
-
-    if (proxyDrag && proxyWindow) {
-        const dx = event.clientX - proxyDrag.startX;
-        const dy = event.clientY - proxyDrag.startY;
-        const maxLeft = Math.max(8, window.innerWidth - proxyWindow.offsetWidth - 8);
-        const maxTop = Math.max(8, window.innerHeight - proxyWindow.offsetHeight - 8);
-        const nextLeft = Math.min(maxLeft, Math.max(8, proxyDrag.left + dx));
-        const nextTop = Math.min(maxTop, Math.max(8, proxyDrag.top + dy));
-        proxyWindow.style.left = `${nextLeft}px`;
-        proxyWindow.style.top = `${nextTop}px`;
-    }
-
-    if (proxyResize && proxyWindow) {
-        const dw = event.clientX - proxyResize.startX;
-        const dh = event.clientY - proxyResize.startY;
-        const newWidth = Math.max(320, proxyResize.width + dw);
-        const newHeight = Math.max(220, proxyResize.height + dh);
-        proxyWindow.style.width = `${newWidth}px`;
-        proxyWindow.style.height = `${newHeight}px`;
-    }
 });
 
 window.addEventListener('pointerup', () => {
@@ -1050,8 +872,6 @@ window.addEventListener('pointerup', () => {
     updatesResize = null;
     gamesDrag = null;
     gamesResize = null;
-    proxyDrag = null;
-    proxyResize = null;
 });
 
 function showMainSettingsView() {
@@ -1195,8 +1015,6 @@ window.addEventListener('keydown', event => {
             closeUpdatesWindow();
         } else if (gamesOverlay?.classList.contains('visible')) {
             closeGamesWindow();
-        } else if (proxyOverlay?.classList.contains('visible')) {
-            closeProxyWindow();
         } else if (noticeAdminOverlay?.classList.contains('visible')) {
             closeNoticeAdminPanel();
         } else if (supportOverlay?.classList.contains('visible')) {
