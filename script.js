@@ -7,6 +7,25 @@ const globalNoticeDismiss = document.getElementById('globalNoticeDismiss');
 let tooltipTimer = null;
 let panelTimer = null;
 const GLOBAL_NOTICE_ENDPOINT = window.GLOBAL_NOTICE_API_URL || '/api/global-notice';
+const SITE_STATS_ENDPOINT = window.SITE_STATS_API_URL || (() => {
+    if (GLOBAL_NOTICE_ENDPOINT.includes('/api/global-notice')) {
+        return GLOBAL_NOTICE_ENDPOINT.replace('/api/global-notice', '/api/site-stats');
+    }
+    return '/api/site-stats';
+})();
+const SITE_POLL_ENDPOINT = window.SITE_POLL_API_URL || (() => {
+    if (GLOBAL_NOTICE_ENDPOINT.includes('/api/global-notice')) {
+        return GLOBAL_NOTICE_ENDPOINT.replace('/api/global-notice', '/api/site-poll');
+    }
+    return '/api/site-poll';
+})();
+const SITE_POPULAR_APPS_ENDPOINT = window.SITE_POPULAR_APPS_API_URL || (() => {
+    if (GLOBAL_NOTICE_ENDPOINT.includes('/api/global-notice')) {
+        return GLOBAL_NOTICE_ENDPOINT.replace('/api/global-notice', '/api/popular-apps');
+    }
+    return '/api/popular-apps';
+})();
+const SITE_VISITOR_STORAGE_KEY = 'site-visitor-id-v1';
 const GLOBAL_NOTICE_POLL_MS = 30000;
 const LAST_NOTICE_CACHE_KEY = 'last-global-notice-payload';
 const NOTICE_DISMISS_DELAY_MS = 3000;
@@ -192,6 +211,7 @@ const gamesWindowResize = document.getElementById('gamesWindowResize');
 const gamesWindowBody = document.getElementById('gamesWindowBody');
 const gamesPreviewFrame = document.getElementById('gamesPreviewFrame');
 const gamesMenuButtons = Array.from(document.querySelectorAll('.games-menu-button[data-target]'));
+const popularAppsList = document.getElementById('popularAppsList');
 let lastScrollY = window.scrollY;
 let appearanceCloseTimer = null;
 let partnersDrag = null;
@@ -479,6 +499,8 @@ function openGameFromButton(gameButton) {
         ? customSrc
         : `game-placeholder.html?section=${encodeURIComponent(sectionKey)}&game=${encodeURIComponent(gameName)}`;
 
+    recordAppLaunch(gameButton);
+
     // If the user scrolled deep in the list, reset to top so preview is fully visible.
     gamesWindowBody.scrollTop = 0;
     gamesWindowBody.classList.remove('is-searching');
@@ -486,6 +508,84 @@ function openGameFromButton(gameButton) {
     gamesWindowBody.classList.add('has-preview');
     setActiveGamesMenuButton(`games-section-${sectionKey}`);
     updateGamesBackButtonVisibility();
+}
+
+function renderPopularAppsThisWeek(entries = []) {
+    if (!popularAppsList) {
+        return;
+    }
+
+    popularAppsList.innerHTML = '';
+
+    if (!Array.isArray(entries) || entries.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'popular-app-empty';
+        empty.textContent = 'No apps tracked yet this week.';
+        popularAppsList.appendChild(empty);
+        return;
+    }
+
+    entries.slice(0, 8).forEach((entry, index) => {
+        const row = document.createElement('div');
+        row.className = 'popular-app-item';
+        row.innerHTML = `
+            <span class="popular-app-rank">#${index + 1}</span>
+            <span class="popular-app-name">${entry.name}</span>
+            <span class="popular-app-count">${Math.max(0, Number(entry.launches) || 0)}</span>
+        `;
+        popularAppsList.appendChild(row);
+    });
+}
+
+async function fetchPopularAppsThisWeek() {
+    try {
+        const response = await fetch(SITE_POPULAR_APPS_ENDPOINT, {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Request failed with ${response.status}`);
+        }
+
+        const payload = await response.json();
+        renderPopularAppsThisWeek(Array.isArray(payload.apps) ? payload.apps : []);
+    } catch {
+        renderPopularAppsThisWeek([]);
+    }
+}
+
+async function recordAppLaunch(gameButton) {
+    if (!gameButton) {
+        return;
+    }
+
+    const appName = gameButton.textContent?.trim();
+    if (!appName) {
+        return;
+    }
+
+    try {
+        const response = await fetch(SITE_POPULAR_APPS_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+            body: JSON.stringify({ appName }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Request failed with ${response.status}`);
+        }
+
+        const payload = await response.json();
+        renderPopularAppsThisWeek(Array.isArray(payload.apps) ? payload.apps : []);
+    } catch {
+        fetchPopularAppsThisWeek();
+    }
 }
 
 function openRandomGame() {
@@ -682,6 +782,8 @@ gamesWindowBody?.addEventListener('click', event => {
 gamesSearchInput?.addEventListener('input', () => {
     renderGamesSearch(gamesSearchInput.value);
 });
+
+fetchPopularAppsThisWeek();
 
 gamesWindowBody?.addEventListener('scroll', updateActiveGamesMenuButton);
 window.addEventListener('resize', updateActiveGamesMenuButton);
@@ -1381,5 +1483,165 @@ function initParticleConstellation() {
 }
 
 initParticleConstellation();
+
+// === Stats Panel ===
+
+(function () {
+    const countEl = document.getElementById('onlineCount');
+    const voteBtn = document.getElementById('pollVoteBtn');
+    const resultsEl = document.getElementById('pollResults');
+    const optionsEl = document.getElementById('pollOptions');
+
+    if (!countEl || !voteBtn || !resultsEl || !optionsEl) {
+        return;
+    }
+
+    function getVisitorId() {
+        try {
+            const existing = localStorage.getItem(SITE_VISITOR_STORAGE_KEY);
+            if (existing) {
+                return existing;
+            }
+            const created = crypto.randomUUID();
+            localStorage.setItem(SITE_VISITOR_STORAGE_KEY, created);
+            return created;
+        } catch {
+            return crypto.randomUUID();
+        }
+    }
+
+    const visitorId = getVisitorId();
+
+    function renderResults(options, votes) {
+        const total = votes.reduce((a, b) => a + b, 0);
+        resultsEl.classList.add('visible');
+        resultsEl.innerHTML = '';
+
+        votes.forEach((voteCount, index) => {
+            const pct = total > 0 ? Math.round((voteCount / total) * 100) : 0;
+            const row = document.createElement('div');
+            row.className = 'poll-result-row';
+            row.innerHTML = `
+                <div class="poll-result-meta">
+                    <span class="poll-result-name">${options[index] || `Option ${index + 1}`}</span>
+                    <span class="poll-result-pct">${pct}%</span>
+                </div>
+                <div class="poll-result-track">
+                    <div class="poll-result-fill" style="width: ${pct}%"></div>
+                </div>
+            `;
+            resultsEl.appendChild(row);
+        });
+    }
+
+    function setPollVotedState() {
+        voteBtn.disabled = true;
+        voteBtn.textContent = 'Voted';
+        optionsEl.querySelectorAll('input[type="radio"]').forEach(input => {
+            input.disabled = true;
+        });
+    }
+
+    async function syncPresence() {
+        try {
+            const response = await fetch(SITE_STATS_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ visitorId }),
+            });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const payload = await response.json();
+            countEl.textContent = String(payload.activeVisitors || 0);
+        } catch {
+            if (!countEl.textContent || countEl.textContent === '—') {
+                countEl.textContent = '--';
+            }
+        }
+    }
+
+    async function loadPollState() {
+        try {
+            const response = await fetch(`${SITE_POLL_ENDPOINT}?visitorId=${encodeURIComponent(visitorId)}`, {
+                method: 'GET',
+            });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const payload = await response.json();
+            const options = Array.isArray(payload.options) ? payload.options : [];
+            const votes = Array.isArray(payload.votes) ? payload.votes : [];
+
+            if (payload.voted && options.length && votes.length) {
+                renderResults(options, votes);
+            } else {
+                resultsEl.classList.remove('visible');
+                resultsEl.innerHTML = '';
+            }
+
+            if (payload.voted) {
+                setPollVotedState();
+            }
+        } catch {
+            // Keep the UI usable even if the API is temporarily unreachable.
+        }
+    }
+
+    voteBtn.addEventListener('click', async () => {
+        const checked = optionsEl.querySelector('input[name="sitePoll"]:checked');
+        if (!checked || voteBtn.disabled) {
+            return;
+        }
+
+        voteBtn.disabled = true;
+
+        try {
+            const response = await fetch(SITE_POLL_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    visitorId,
+                    option: Number(checked.value),
+                }),
+            });
+
+            if (!response.ok) {
+                voteBtn.disabled = false;
+                return;
+            }
+
+            const payload = await response.json();
+            const options = Array.isArray(payload.options) ? payload.options : [];
+            const votes = Array.isArray(payload.votes) ? payload.votes : [];
+
+            if (options.length && votes.length) {
+                renderResults(options, votes);
+            }
+
+            setPollVotedState();
+        } catch {
+            voteBtn.disabled = false;
+        }
+    });
+
+    syncPresence();
+    window.setInterval(syncPresence, 25000);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            syncPresence();
+        }
+    });
+
+    loadPollState();
+}());
 
 

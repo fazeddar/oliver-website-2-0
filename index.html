@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Infinite Campus</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script>window.GLOBAL_NOTICE_API_URL = 'https://global-notice-worker.bigguy8014.workers.dev/api/global-notice';</script>
+    <script>
+        window.GLOBAL_NOTICE_API_URL = 'https://global-notice-worker.bigguy8014.workers.dev/api/global-notice';
+        window.SITE_STATS_API_URL = 'https://global-notice-worker.bigguy8014.workers.dev/api/site-stats';
+        window.SITE_POLL_API_URL = 'https://global-notice-worker.bigguy8014.workers.dev/api/site-poll';
+        window.SITE_POPULAR_APPS_API_URL = 'https://global-notice-worker.bigguy8014.workers.dev/api/popular-apps';
+    </script>
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -27,6 +32,50 @@
         <h2 class="side-menu-title">Menu</h2>
         <button class="side-menu-button" id="settingsMenuBtn" type="button">Settings</button>
         <button class="side-menu-button" id="supportMenuBtn" type="button">Support Me </button>
+    </aside>
+
+    <aside class="stats-panel" id="statsPanel" aria-label="Site stats">
+        <div class="stats-scroll">
+            <div class="stats-section">
+                <span class="stats-label">Online Now</span>
+                <div class="stats-count-row">
+                    <span class="stats-count" id="onlineCount">—</span>
+                    <span class="stats-count-dot" id="onlineCountDot"></span>
+                </div>
+                <span class="stats-sublabel">visitors active</span>
+            </div>
+            <div class="stats-divider"></div>
+            <div class="stats-section">
+                <span class="stats-label">Poll</span>
+                <p class="poll-question">What's your fav tool?</p>
+                <div class="poll-options" id="pollOptions">
+                    <label class="poll-option">
+                        <input type="radio" name="sitePoll" value="0" />
+                        <span class="poll-option-label">TuffTerminal</span>
+                    </label>
+                    <label class="poll-option">
+                        <input type="radio" name="sitePoll" value="1" />
+                        <span class="poll-option-label">WebConsole</span>
+                    </label>
+                    <label class="poll-option">
+                        <input type="radio" name="sitePoll" value="2" />
+                        <span class="poll-option-label">pr0xy</span>
+                    </label>
+                    <label class="poll-option">
+                        <input type="radio" name="sitePoll" value="3" />
+                        <span class="poll-option-label">Games</span>
+                    </label>
+                </div>
+                <button class="poll-vote-btn" id="pollVoteBtn" type="button">Vote</button>
+                <div class="poll-results" id="pollResults" aria-live="polite"></div>
+            </div>
+            <div class="stats-divider"></div>
+            <div class="stats-section">
+                <span class="stats-label">Most Popular Apps This Week</span>
+                <p class="popular-apps-subtext">Ranked by launches this week.</p>
+                <div class="popular-apps-list" id="popularAppsList" aria-live="polite"></div>
+            </div>
+        </div>
     </aside>
 
     <div class="global-notice-overlay" id="globalNoticeOverlay" aria-hidden="true">

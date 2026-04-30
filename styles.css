@@ -73,8 +73,269 @@ body::after {
     position: relative;
     z-index: 1;
     padding: 24px;
-    padding-left: 90px;
+    padding-left: 456px;
     padding-bottom: 120px;
+}
+
+.stats-panel {
+    position: fixed;
+    left: 84px;
+    top: 1mm;
+    bottom: 1mm;
+    height: auto;
+    width: 330px;
+    z-index: 2;
+    display: block;
+    padding: 18px 16px;
+    overflow: hidden;
+    overflow-x: hidden;
+    border-radius: 18px;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--chrome-dark) 82%, transparent), color-mix(in srgb, var(--chrome-mid) 74%, transparent));
+    border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    backdrop-filter: blur(28px) saturate(160%);
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--accent) 30%, transparent) transparent;
+}
+
+.stats-scroll {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--accent) 30%, transparent) transparent;
+}
+
+.stats-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 0;
+}
+
+.stats-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--text) 55%, transparent);
+    margin-bottom: 2px;
+}
+
+.stats-count-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stats-count {
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    line-height: 1;
+    text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);
+    transition: color 0.4s ease;
+}
+
+.stats-count-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 8px #4ade80;
+    flex-shrink: 0;
+    animation: dotPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.82); }
+}
+
+.stats-sublabel {
+    font-size: 0.74rem;
+    color: color-mix(in srgb, var(--text) 50%, transparent);
+    letter-spacing: 0.03em;
+}
+
+.stats-divider {
+    height: 1px;
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    margin: 4px 0;
+}
+
+.poll-question {
+    margin: 0 0 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.35;
+}
+
+.poll-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.poll-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.poll-option:hover {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.poll-option input[type="radio"] {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.poll-option-label {
+    font-size: 0.82rem;
+    color: var(--text);
+    letter-spacing: 0.02em;
+}
+
+.poll-vote-btn {
+    margin-top: 12px;
+    width: 100%;
+    border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 0;
+    font-size: 0.84rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.poll-vote-btn:hover {
+    background: color-mix(in srgb, var(--accent) 28%, transparent);
+    transform: translateY(-1px);
+}
+
+.poll-vote-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.poll-results {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.poll-results.visible {
+    display: flex;
+}
+
+.popular-apps-subtext {
+    margin: 0 0 10px;
+    font-size: 0.74rem;
+    color: color-mix(in srgb, var(--text) 55%, transparent);
+    letter-spacing: 0.02em;
+}
+
+.popular-apps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.popular-app-item {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.popular-app-rank {
+    font-size: 0.72rem;
+    color: color-mix(in srgb, var(--text) 68%, transparent);
+}
+
+.popular-app-name {
+    font-size: 0.79rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.popular-app-count {
+    font-size: 0.72rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.popular-app-empty {
+    margin: 2px 0 0;
+    font-size: 0.76rem;
+    color: color-mix(in srgb, var(--text) 58%, transparent);
+}
+
+.poll-result-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.poll-result-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.poll-result-name {
+    font-size: 0.76rem;
+    color: color-mix(in srgb, var(--text) 80%, transparent);
+    letter-spacing: 0.02em;
+}
+
+.poll-result-pct {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.poll-result-track {
+    height: 5px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    overflow: hidden;
+}
+
+.poll-result-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 55%, transparent);
+    transition: width 0.6s cubic-bezier(0.3, 0, 0.2, 1);
 }
 
 .global-notice-overlay {
@@ -1136,6 +1397,16 @@ body::after {
     height: 9px;
     animation-duration: 15s;
     animation-delay: -5s;
+}
+
+@media (max-width: 860px) {
+    .stats-panel {
+        display: none;
+    }
+
+    .app-shell {
+        padding-left: 90px;
+    }
 }
 
 @media (max-width: 640px) {

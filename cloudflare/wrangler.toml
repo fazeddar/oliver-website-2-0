@@ -10,9 +10,13 @@ id = "710614a2267a4d1d85920f0acdd637cf"
 preview_id = "c225d10602484dc98226535ce9162ccd"
 
 # Recommended if you want the site frontend to work without editing JS:
-# add a route so the worker answers on the same domain at /api/global-notice*
+# add routes so the worker answers on the same domain at
+# /api/global-notice*, /api/site-stats*, /api/site-poll*, and /api/popular-apps*
 # routes = [
-#   { pattern = "your-domain.example/api/global-notice*", zone_name = "your-domain.example" }
+#   { pattern = "your-domain.example/api/global-notice*", zone_name = "your-domain.example" },
+#   { pattern = "your-domain.example/api/site-stats*", zone_name = "your-domain.example" },
+#   { pattern = "your-domain.example/api/site-poll*", zone_name = "your-domain.example" },
+#   { pattern = "your-domain.example/api/popular-apps*", zone_name = "your-domain.example" }
 # ]
 
 # After creating the worker, set the admin password with:
