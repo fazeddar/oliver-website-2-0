@@ -354,6 +354,7 @@ body::after {
 }
 
 .proxy-window-body {
+    position: relative;
     height: calc(100% - 52px);
     overflow: hidden;
     background: rgba(10, 7, 18, 0.24);
@@ -367,6 +368,21 @@ body::after {
     border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
     border-radius: 10px;
     background: #ffffff;
+}
+
+.proxy-error-msg {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary, #8b97b0);
+    background: rgba(10, 7, 18, 0.7);
+    border-radius: 10px;
+    line-height: 1.6;
 }
 
 .games-preview-frame {

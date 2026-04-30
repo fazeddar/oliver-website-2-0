@@ -335,7 +335,11 @@
         <article class="games-window" id="proxyWindow" role="dialog" aria-modal="true" aria-labelledby="proxyWindowTitle">
             <header class="games-window-header" id="proxyWindowHeader">
                 <h2 class="games-window-title" id="proxyWindowTitle">Ρrоху</h2>
-                <button class="games-window-close" id="proxyWindowClose" type="button" aria-label="Close proxy window">Close</button>
+                <div class="games-window-actions">
+                    <button class="games-window-random" id="proxyHomeBtn" type="button" aria-label="Go to proxy home">Home</button>
+                    <button class="games-window-random" id="proxyReloadBtn" type="button" aria-label="Reload proxy page">Reload</button>
+                    <button class="games-window-close" id="proxyWindowClose" type="button" aria-label="Close proxy window">Close</button>
+                </div>
             </header>
             <div class="games-window-body proxy-window-body">
                 <iframe class="proxy-window-frame" id="proxyWindowFrame" title="Proxy window" src="about:blank" loading="lazy"></iframe>

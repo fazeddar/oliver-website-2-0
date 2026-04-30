@@ -1,4 +1,4 @@
-const tooltipPanel = document.getElementById('tooltipPanel');
+﻿const tooltipPanel = document.getElementById('tooltipPanel');
 const tooltipText = document.getElementById('tooltipText');
 const globalNoticeOverlay = document.getElementById('globalNoticeOverlay');
 const globalNoticeBar = document.getElementById('globalNoticeBar');
@@ -197,7 +197,27 @@ const proxyOverlay = document.getElementById('proxyOverlay');
 const proxyWindow = document.getElementById('proxyWindow');
 const proxyWindowHeader = document.getElementById('proxyWindowHeader');
 const proxyWindowClose = document.getElementById('proxyWindowClose');
+const proxyHomeBtn = document.getElementById('proxyHomeBtn');
+const proxyReloadBtn = document.getElementById('proxyReloadBtn');
 const proxyWindowResize = document.getElementById('proxyWindowResize');
+const proxyWindowFrame = document.getElementById('proxyWindowFrame');
+function resolveProxyUrl() {
+    const explicit = window.SCRAMJET_PROXY_URL || window.PROXY_APP_URL;
+    if (typeof explicit === 'string' && explicit.trim()) {
+        return explicit.trim();
+    }
+
+    if (location.protocol === 'http:' || location.protocol === 'https:') {
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            return 'http://localhost:8080/';
+        }
+        return new URL('/uv/', location.origin).toString();
+    }
+
+    return 'http://localhost:8080/';
+}
+
+const SCRAMJET_PROXY_URL = resolveProxyUrl();
 let lastScrollY = window.scrollY;
 let appearanceCloseTimer = null;
 let partnersDrag = null;
@@ -473,9 +493,69 @@ function openGamesWindow() {
     updateGamesBackButtonVisibility();
 }
 
+function setProxyError(msg) {
+    if (!proxyWindowFrame) return;
+    proxyWindowFrame.src = 'about:blank';
+    const body = proxyWindowFrame.closest('.proxy-window-body');
+    if (!body) return;
+    let err = body.querySelector('.proxy-error-msg');
+    if (!err) {
+        err = document.createElement('div');
+        err.className = 'proxy-error-msg';
+        body.appendChild(err);
+    }
+    err.textContent = msg;
+    err.style.display = 'flex';
+}
+
+function clearProxyError() {
+    const err = proxyWindowFrame?.closest('.proxy-window-body')?.querySelector('.proxy-error-msg');
+    if (err) err.style.display = 'none';
+}
+
 function openProxyWindow() {
+    if (location.protocol === 'file:') {
+        proxyOverlay?.classList.add('visible');
+        proxyOverlay?.setAttribute('aria-hidden', 'false');
+        setProxyError('This proxy cannot run from file://. Host this website over HTTPS/HTTP and run the proxy backend on the configured URL.');
+        return;
+    }
+
+    if (proxyWindowFrame && proxyWindowFrame.src !== SCRAMJET_PROXY_URL) {
+        clearProxyError();
+        proxyWindowFrame.src = SCRAMJET_PROXY_URL;
+        proxyWindowFrame.onerror = () => setProxyError(`Could not reach the proxy server at ${SCRAMJET_PROXY_URL}.`);
+    }
+
     proxyOverlay?.classList.add('visible');
     proxyOverlay?.setAttribute('aria-hidden', 'false');
+}
+
+function showProxyHome() {
+    if (!proxyWindowFrame) {
+        return;
+    }
+
+    clearProxyError();
+    proxyWindowFrame.src = SCRAMJET_PROXY_URL;
+}
+
+function reloadProxyPage() {
+    if (!proxyWindowFrame) {
+        return;
+    }
+
+    if (!proxyWindowFrame.src || proxyWindowFrame.src === 'about:blank') {
+        clearProxyError();
+        proxyWindowFrame.src = SCRAMJET_PROXY_URL;
+        return;
+    }
+
+    try {
+        proxyWindowFrame.contentWindow?.location.reload();
+    } catch {
+        proxyWindowFrame.src = proxyWindowFrame.src;
+    }
 }
 
 function closeProxyWindow() {
@@ -645,6 +725,8 @@ gamesRandomBtn?.addEventListener('click', openRandomGame);
 gamesWindowBack?.addEventListener('click', showGamesHome);
 gamesWindowClose?.addEventListener('click', closeGamesWindow);
 proxyWindowClose?.addEventListener('click', closeProxyWindow);
+proxyHomeBtn?.addEventListener('click', showProxyHome);
+proxyReloadBtn?.addEventListener('click', reloadProxyPage);
 updatesWindowClose?.addEventListener('click', closeUpdatesWindow);
 
 partnersOverlay?.addEventListener('click', event => {
@@ -830,7 +912,8 @@ gamesWindowResize?.addEventListener('pointerdown', event => {
 });
 
 proxyWindowHeader?.addEventListener('pointerdown', event => {
-    if (!proxyWindow || event.target === proxyWindowClose || proxyWindowClose?.contains(event.target)) {
+    const pressedButton = event.target instanceof Element ? event.target.closest('button') : null;
+    if (!proxyWindow || pressedButton) {
         return;
     }
 
@@ -1467,3 +1550,5 @@ function initParticleConstellation() {
 }
 
 initParticleConstellation();
+
+
