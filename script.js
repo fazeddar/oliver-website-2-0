@@ -214,6 +214,11 @@ const tickerText = document.getElementById('tickerText');
 const pollQuestion = document.getElementById('pollQuestion');
 const maintenanceOverlay = document.getElementById('maintenanceOverlay');
 const maintenanceMsgText = document.getElementById('maintenanceMsgText');
+const maintenanceBypassToggle = document.getElementById('maintenanceBypassToggle');
+const maintenanceBypassForm = document.getElementById('maintenanceBypassForm');
+const maintenanceBypassInput = document.getElementById('maintenanceBypassInput');
+const maintenanceBypassBtn = document.getElementById('maintenanceBypassBtn');
+const maintenanceBypassError = document.getElementById('maintenanceBypassError');
 const settingsOpenBlankBtn = document.getElementById('settingsOpenBlankBtn');
 const settingsAppearanceBtn = document.getElementById('settingsAppearanceBtn');
 const settingsPrivacyBtn = document.getElementById('settingsPrivacyBtn');
@@ -670,6 +675,46 @@ async function fetchMaintenanceStatus() {
         }
     } catch { /* silent */ }
 }
+
+maintenanceBypassToggle?.addEventListener('click', () => {
+    maintenanceBypassForm?.classList.toggle('visible');
+    if (maintenanceBypassForm?.classList.contains('visible')) {
+        maintenanceBypassInput?.focus();
+    }
+});
+
+async function tryMaintenanceBypass() {
+    const password = maintenanceBypassInput?.value?.trim();
+    if (!password) return;
+    if (maintenanceBypassError) maintenanceBypassError.textContent = '';
+    if (maintenanceBypassBtn) maintenanceBypassBtn.disabled = true;
+
+    try {
+        const res = await fetch(GLOBAL_NOTICE_ENDPOINT, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ password }),
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(payload?.error || 'Wrong password.');
+
+        // Password correct — hide maintenance overlay for this session
+        verifiedNoticePassword = password;
+        if (maintenanceOverlay) {
+            maintenanceOverlay.classList.remove('visible');
+            maintenanceOverlay.setAttribute('aria-hidden', 'true');
+        }
+    } catch (err) {
+        if (maintenanceBypassError) maintenanceBypassError.textContent = err.message;
+    } finally {
+        if (maintenanceBypassBtn) maintenanceBypassBtn.disabled = false;
+    }
+}
+
+maintenanceBypassBtn?.addEventListener('click', tryMaintenanceBypass);
+maintenanceBypassInput?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); tryMaintenanceBypass(); }
+});
 
 function openNoticeAdminPanel() {
     if (!noticeAdminOverlay) {

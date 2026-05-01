@@ -411,7 +411,7 @@ body::after {
     position: fixed;
     top: 16px;
     right: 16px;
-    z-index: 13;
+    z-index: 10001;
     width: 42px;
     height: 42px;
     border: 1px solid color-mix(in srgb, var(--accent) 54%, transparent);
@@ -1780,7 +1780,7 @@ body::-webkit-scrollbar-thumb:hover {
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 9999;
+    z-index: 10000;
     background: color-mix(in srgb, var(--bg-dark, #050006) 94%, transparent);
     align-items: center;
     justify-content: center;
@@ -1820,4 +1820,78 @@ body::-webkit-scrollbar-thumb:hover {
     opacity: 0.8;
     margin: 0;
     line-height: 1.5;
+}
+
+.maintenance-bypass {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.maintenance-bypass-toggle {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.35);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.maintenance-bypass-toggle:hover {
+    color: rgba(255,255,255,0.6);
+}
+
+.maintenance-bypass-form {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.maintenance-bypass-form.visible {
+    display: flex;
+}
+
+.maintenance-bypass-input {
+    width: 100%;
+    max-width: 260px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    border-radius: 10px;
+    color: var(--text, #e8e0f0);
+    font-size: 0.9rem;
+    outline: none;
+    text-align: center;
+}
+
+.maintenance-bypass-input:focus {
+    border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.maintenance-bypass-btn {
+    padding: 7px 22px;
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    border-radius: 10px;
+    color: var(--text, #e8e0f0);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.maintenance-bypass-btn:hover {
+    background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.maintenance-bypass-error {
+    font-size: 0.78rem;
+    color: #ff6b6b;
+    min-height: 1em;
 }
