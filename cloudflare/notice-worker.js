@@ -320,8 +320,14 @@ export default {
 
                 const config = { question, options, updatedAt: new Date().toISOString() };
                 await env.NOTICE_STORE.put(POLL_CONFIG_KEY, JSON.stringify(config));
-                // Reset votes since options changed
+                // Reset votes and clear all voted keys so everyone can vote again
                 await env.NOTICE_STORE.put(POLL_KEY, JSON.stringify({ votes: options.map(() => 0), updatedAt: new Date().toISOString() }));
+                let cursor;
+                do {
+                    const page = await env.NOTICE_STORE.list({ prefix: POLL_VOTED_PREFIX, cursor, limit: 1000 });
+                    await Promise.all(page.keys.map(k => env.NOTICE_STORE.delete(k.name)));
+                    cursor = page.list_complete ? undefined : page.cursor;
+                } while (cursor);
                 return jsonResponse({ ...config, votesReset: true }, 200, origin);
             }
 
@@ -510,7 +516,18 @@ export default {
 
                 const config = await readPollConfig(env);
                 await env.NOTICE_STORE.put(POLL_KEY, JSON.stringify({ votes: config.options.map(() => 0), updatedAt: new Date().toISOString() }));
-                return jsonResponse({ reset: true, updatedAt: new Date().toISOString() }, 200, origin);
+
+                // Clear all voted keys so everyone can vote again
+                let cursor;
+                let deleted = 0;
+                do {
+                    const page = await env.NOTICE_STORE.list({ prefix: POLL_VOTED_PREFIX, cursor, limit: 1000 });
+                    await Promise.all(page.keys.map(k => env.NOTICE_STORE.delete(k.name)));
+                    deleted += page.keys.length;
+                    cursor = page.list_complete ? undefined : page.cursor;
+                } while (cursor);
+
+                return jsonResponse({ reset: true, votesCleared: deleted, updatedAt: new Date().toISOString() }, 200, origin);
             }
 
             if (path === '/api/site-stats') {
