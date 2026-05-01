@@ -25,6 +25,15 @@ const SITE_POPULAR_APPS_ENDPOINT = window.SITE_POPULAR_APPS_API_URL || (() => {
     }
     return '/api/popular-apps';
 })();
+const SITE_MAINTENANCE_ENDPOINT = GLOBAL_NOTICE_ENDPOINT.includes('/api/global-notice')
+    ? GLOBAL_NOTICE_ENDPOINT.replace('/api/global-notice', '/api/maintenance')
+    : '/api/maintenance';
+const SITE_TICKER_ENDPOINT = GLOBAL_NOTICE_ENDPOINT.includes('/api/global-notice')
+    ? GLOBAL_NOTICE_ENDPOINT.replace('/api/global-notice', '/api/ticker')
+    : '/api/ticker';
+const SITE_FEATURED_GAME_ENDPOINT = GLOBAL_NOTICE_ENDPOINT.includes('/api/global-notice')
+    ? GLOBAL_NOTICE_ENDPOINT.replace('/api/global-notice', '/api/featured-game')
+    : '/api/featured-game';
 const SITE_VISITOR_STORAGE_KEY = 'site-visitor-id-v1';
 const GLOBAL_NOTICE_POLL_MS = 30000;
 const LAST_NOTICE_CACHE_KEY = 'last-global-notice-payload';
@@ -34,6 +43,7 @@ let currentNoticeSignature = null;
 let dismissedNoticeMessage = '';
 let shownNoticeSignature = null;
 let noticeDismissUnlockAt = 0;
+let currentFeaturedGame = '';
 let noticeDismissInterval = null;
 
 function resetNoticeDismissButton() {
@@ -179,6 +189,31 @@ const noticeComposerStatus = document.getElementById('noticeComposerStatus');
 const noticePublishBtn = document.getElementById('noticePublishBtn');
 const noticeClearBtn = document.getElementById('noticeClearBtn');
 const noticeRefreshBtn = document.getElementById('noticeRefreshBtn');
+const leaderboardResetBtn = document.getElementById('leaderboardResetBtn');
+const pollResetBtn = document.getElementById('pollResetBtn');
+const pollUpdateBtn = document.getElementById('pollUpdateBtn');
+const pollQuestionInput = document.getElementById('pollQuestionInput');
+const pollOptionsInput = document.getElementById('pollOptionsInput');
+const tickerPublishBtn = document.getElementById('tickerPublishBtn');
+const tickerClearBtn = document.getElementById('tickerClearBtn');
+const tickerInput = document.getElementById('tickerInput');
+const featuredGameSetBtn = document.getElementById('featuredGameSetBtn');
+const featuredGameClearBtn = document.getElementById('featuredGameClearBtn');
+const featuredGameInput = document.getElementById('featuredGameInput');
+const maintenanceOnBtn = document.getElementById('maintenanceOnBtn');
+const maintenanceOffBtn = document.getElementById('maintenanceOffBtn');
+const maintenanceMessageInput = document.getElementById('maintenanceMessageInput');
+const clearPresenceBtn = document.getElementById('clearPresenceBtn');
+const adminStatsRefreshBtn = document.getElementById('adminStatsRefreshBtn');
+const adminOnlineCount = document.getElementById('adminOnlineCount');
+const adminPollVotes = document.getElementById('adminPollVotes');
+const adminLaunches = document.getElementById('adminLaunches');
+const tickerSection = document.getElementById('tickerSection');
+const tickerDivider = document.getElementById('tickerDivider');
+const tickerText = document.getElementById('tickerText');
+const pollQuestion = document.getElementById('pollQuestion');
+const maintenanceOverlay = document.getElementById('maintenanceOverlay');
+const maintenanceMsgText = document.getElementById('maintenanceMsgText');
 const settingsOpenBlankBtn = document.getElementById('settingsOpenBlankBtn');
 const settingsAppearanceBtn = document.getElementById('settingsAppearanceBtn');
 const settingsPrivacyBtn = document.getElementById('settingsPrivacyBtn');
@@ -375,6 +410,7 @@ async function verifyNoticePassword() {
         showNoticeComposerView();
         noticeMessageInput?.focus();
         fetchGlobalNotice({ silent: true });
+        fetchAdminStats();
     } catch (error) {
         verifiedNoticePassword = '';
         setNoticeAdminStatus(error.message, 'is-error');
@@ -422,6 +458,217 @@ async function updateGlobalNotice(method) {
     } catch (error) {
         setNoticeComposerStatus(error.message, 'is-error');
     }
+}
+
+async function resetLeaderboard() {
+    const password = verifiedNoticePassword;
+    if (!password) {
+        setNoticeComposerStatus('Unlock the broadcast panel first.', 'is-error');
+        return;
+    }
+
+    setNoticeComposerStatus('Resetting leaderboard...', '');
+
+    try {
+        const response = await fetch(SITE_POPULAR_APPS_ENDPOINT, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+            body: JSON.stringify({ password }),
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload?.error || `Request failed with ${response.status}`);
+        }
+
+        setNoticeComposerStatus('Leaderboard reset for this week.', 'is-success');
+        renderPopularAppsThisWeek();
+    } catch (error) {
+        setNoticeComposerStatus(error.message, 'is-error');
+    }
+}
+
+// ─── Admin helper ────────────────────────────────────────────────────────────
+async function adminFetch(url, method, extra = {}) {
+    const password = verifiedNoticePassword;
+    if (!password) {
+        setNoticeComposerStatus('Unlock the broadcast panel first.', 'is-error');
+        return null;
+    }
+    try {
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ password, ...extra }),
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload?.error || `Request failed with ${response.status}`);
+        return payload;
+    } catch (error) {
+        setNoticeComposerStatus(error.message, 'is-error');
+        return null;
+    }
+}
+
+async function resetPoll() {
+    setNoticeComposerStatus('Resetting poll votes...', '');
+    const result = await adminFetch(SITE_POLL_ENDPOINT, 'DELETE');
+    if (result) setNoticeComposerStatus('Poll votes reset.', 'is-success');
+}
+
+async function updatePollConfig() {
+    const question = pollQuestionInput?.value.trim();
+    const rawOptions = pollOptionsInput?.value.trim();
+    if (!question || !rawOptions) {
+        setNoticeComposerStatus('Enter a question and options.', 'is-error');
+        return;
+    }
+    const options = rawOptions.split('\n').map(o => o.trim()).filter(Boolean);
+    if (options.length < 2) {
+        setNoticeComposerStatus('Need at least 2 options.', 'is-error');
+        return;
+    }
+    setNoticeComposerStatus('Updating poll...', '');
+    const result = await adminFetch(SITE_POLL_ENDPOINT, 'PUT', { question, options });
+    if (result) {
+        setNoticeComposerStatus('Poll updated (votes reset).', 'is-success');
+        if (pollQuestion) pollQuestion.textContent = question;
+    }
+}
+
+async function publishTicker() {
+    const message = tickerInput?.value.trim();
+    if (!message) {
+        setNoticeComposerStatus('Enter a ticker message.', 'is-error');
+        return;
+    }
+    setNoticeComposerStatus('Publishing ticker...', '');
+    const result = await adminFetch(SITE_TICKER_ENDPOINT, 'POST', { message, active: true });
+    if (result) {
+        setNoticeComposerStatus('Ticker published.', 'is-success');
+        renderTicker(result);
+    }
+}
+
+async function clearTicker() {
+    setNoticeComposerStatus('Clearing ticker...', '');
+    const result = await adminFetch(SITE_TICKER_ENDPOINT, 'DELETE');
+    if (result) {
+        setNoticeComposerStatus('Ticker cleared.', 'is-success');
+        renderTicker({ active: false, message: '' });
+    }
+}
+
+async function setFeaturedGame() {
+    const name = featuredGameInput?.value.trim();
+    if (!name) {
+        setNoticeComposerStatus('Enter a game name.', 'is-error');
+        return;
+    }
+    setNoticeComposerStatus('Setting featured game...', '');
+    const result = await adminFetch(SITE_FEATURED_GAME_ENDPOINT, 'POST', { name });
+    if (result) {
+        currentFeaturedGame = result.name || '';
+        setNoticeComposerStatus('Featured game set.', 'is-success');
+        fetchPopularAppsThisWeek();
+    }
+}
+
+async function clearFeaturedGame() {
+    setNoticeComposerStatus('Clearing featured game...', '');
+    const result = await adminFetch(SITE_FEATURED_GAME_ENDPOINT, 'DELETE');
+    if (result) {
+        currentFeaturedGame = '';
+        setNoticeComposerStatus('Featured game cleared.', 'is-success');
+        fetchPopularAppsThisWeek();
+    }
+}
+
+async function enableMaintenance() {
+    const message = maintenanceMessageInput?.value.trim() || 'Site under maintenance. Back soon!';
+    setNoticeComposerStatus('Enabling maintenance mode...', '');
+    const result = await adminFetch(SITE_MAINTENANCE_ENDPOINT, 'POST', { active: true, message });
+    if (result) setNoticeComposerStatus('Maintenance mode ON.', 'is-success');
+}
+
+async function disableMaintenance() {
+    setNoticeComposerStatus('Disabling maintenance mode...', '');
+    const result = await adminFetch(SITE_MAINTENANCE_ENDPOINT, 'POST', { active: false, message: '' });
+    if (result) setNoticeComposerStatus('Maintenance mode OFF.', 'is-success');
+}
+
+async function clearAllPresence() {
+    setNoticeComposerStatus('Clearing presence keys...', '');
+    const result = await adminFetch(SITE_STATS_ENDPOINT, 'DELETE');
+    if (result) setNoticeComposerStatus(`Cleared ${result.deleted ?? 0} presence key(s).`, 'is-success');
+}
+
+async function fetchAdminStats() {
+    if (adminOnlineCount) adminOnlineCount.textContent = '…';
+    if (adminPollVotes) adminPollVotes.textContent = '…';
+    if (adminLaunches) adminLaunches.textContent = '…';
+    try {
+        const [statsRes, pollRes, appsRes] = await Promise.all([
+            fetch(SITE_STATS_ENDPOINT, { headers: { Accept: 'application/json' } }),
+            fetch(SITE_POLL_ENDPOINT, { headers: { Accept: 'application/json' } }),
+            fetch(SITE_POPULAR_APPS_ENDPOINT, { headers: { Accept: 'application/json' } }),
+        ]);
+        const [stats, poll, apps] = await Promise.all([statsRes.json(), pollRes.json(), appsRes.json()]);
+        if (adminOnlineCount) adminOnlineCount.textContent = String(stats.activeVisitors ?? '—');
+        if (adminPollVotes) adminPollVotes.textContent = String(poll.totalVotes ?? '—');
+        const totalLaunches = Array.isArray(apps.apps) ? apps.apps.reduce((s, a) => s + (a.launches || 0), 0) : '—';
+        if (adminLaunches) adminLaunches.textContent = String(totalLaunches);
+    } catch {
+        if (adminOnlineCount) adminOnlineCount.textContent = 'err';
+        if (adminPollVotes) adminPollVotes.textContent = 'err';
+        if (adminLaunches) adminLaunches.textContent = 'err';
+    }
+}
+
+function renderTicker(payload) {
+    if (!tickerSection || !tickerDivider || !tickerText) return;
+    if (payload?.active && payload.message) {
+        tickerText.textContent = payload.message;
+        tickerSection.style.display = '';
+        tickerDivider.style.display = '';
+    } else {
+        tickerSection.style.display = 'none';
+        tickerDivider.style.display = 'none';
+        tickerText.textContent = '';
+    }
+}
+
+async function fetchTicker() {
+    try {
+        const res = await fetch(SITE_TICKER_ENDPOINT, { headers: { Accept: 'application/json' } });
+        if (!res.ok) return;
+        renderTicker(await res.json());
+    } catch { /* silent */ }
+}
+
+async function fetchFeaturedGame() {
+    try {
+        const res = await fetch(SITE_FEATURED_GAME_ENDPOINT, { headers: { Accept: 'application/json' } });
+        if (!res.ok) return;
+        const data = await res.json();
+        currentFeaturedGame = data.name || '';
+    } catch { /* silent */ }
+}
+
+async function fetchMaintenanceStatus() {
+    try {
+        const res = await fetch(SITE_MAINTENANCE_ENDPOINT, { headers: { Accept: 'application/json' } });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.active && maintenanceOverlay && maintenanceMsgText) {
+            maintenanceMsgText.textContent = data.message || 'Back soon!';
+            maintenanceOverlay.classList.add('visible');
+            maintenanceOverlay.setAttribute('aria-hidden', 'false');
+        }
+    } catch { /* silent */ }
 }
 
 function openNoticeAdminPanel() {
@@ -528,9 +775,10 @@ function renderPopularAppsThisWeek(entries = []) {
     entries.slice(0, 8).forEach((entry, index) => {
         const row = document.createElement('div');
         row.className = 'popular-app-item';
+        const isFeatured = currentFeaturedGame && entry.name.toLowerCase() === currentFeaturedGame.toLowerCase();
         row.innerHTML = `
             <span class="popular-app-rank">#${index + 1}</span>
-            <span class="popular-app-name">${entry.name}</span>
+            <span class="popular-app-name">${entry.name}${isFeatured ? ' <span class="featured-star" title="Featured">⭐</span>' : ''}</span>
             <span class="popular-app-count">${Math.max(0, Number(entry.launches) || 0)}</span>
         `;
         popularAppsList.appendChild(row);
@@ -1078,6 +1326,17 @@ noticeAdminBackBtn?.addEventListener('click', () => {
 noticePublishBtn?.addEventListener('click', () => updateGlobalNotice('POST'));
 noticeClearBtn?.addEventListener('click', () => updateGlobalNotice('DELETE'));
 noticeRefreshBtn?.addEventListener('click', () => fetchGlobalNotice({ silent: false }));
+leaderboardResetBtn?.addEventListener('click', resetLeaderboard);
+pollResetBtn?.addEventListener('click', resetPoll);
+pollUpdateBtn?.addEventListener('click', updatePollConfig);
+tickerPublishBtn?.addEventListener('click', publishTicker);
+tickerClearBtn?.addEventListener('click', clearTicker);
+featuredGameSetBtn?.addEventListener('click', setFeaturedGame);
+featuredGameClearBtn?.addEventListener('click', clearFeaturedGame);
+maintenanceOnBtn?.addEventListener('click', enableMaintenance);
+maintenanceOffBtn?.addEventListener('click', disableMaintenance);
+clearPresenceBtn?.addEventListener('click', clearAllPresence);
+adminStatsRefreshBtn?.addEventListener('click', fetchAdminStats);
 globalNoticeDismiss?.addEventListener('click', dismissCurrentGlobalNotice);
 globalNoticeOverlay?.addEventListener('click', event => {
     if (event.target === globalNoticeOverlay) {
@@ -1143,6 +1402,9 @@ settingsPrivacyBtn?.addEventListener('click', () => {
 
 renderGlobalNotice(readCachedNotice() || { active: false, message: '' });
 fetchGlobalNotice({ silent: true });
+fetchTicker();
+fetchFeaturedGame();
+fetchMaintenanceStatus();
 window.setInterval(() => {
     fetchGlobalNotice({ silent: true });
 }, GLOBAL_NOTICE_POLL_MS);
@@ -1578,6 +1840,22 @@ initParticleConstellation();
             const payload = await response.json();
             const options = Array.isArray(payload.options) ? payload.options : [];
             const votes = Array.isArray(payload.votes) ? payload.votes : [];
+
+            // Update poll question text dynamically
+            if (payload.question && pollQuestion) {
+                pollQuestion.textContent = payload.question;
+            }
+
+            // Re-render options dynamically if they differ from current HTML
+            if (options.length > 0) {
+                optionsEl.innerHTML = '';
+                options.forEach((label, index) => {
+                    const opt = document.createElement('label');
+                    opt.className = 'poll-option';
+                    opt.innerHTML = `<input type="radio" name="sitePoll" value="${index}" /><span class="poll-option-label">${label}</span>`;
+                    optionsEl.appendChild(opt);
+                });
+            }
 
             if (payload.voted && options.length && votes.length) {
                 renderResults(options, votes);

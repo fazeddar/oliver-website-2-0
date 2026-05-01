@@ -2104,6 +2104,477 @@
             })();
         };
 
+        window.inlineGames.btd6 = function (root) {
+            const SWF_URL = 'https://cdn.jsdelivr.net/gh/bubbls/UGS-file-encryption@b6b363179429fc584fac223384f1b45cc419d1a7/WDzRSvadTXBNOR.swf';
+            const RUFFLE_URL = 'https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle@0.2.0-nightly.2025.10.2/ruffle.min.js';
+
+            root.style.padding = '0';
+            root.style.display = 'block';
+            root.style.minHeight = '100vh';
+            root.style.background = '#000';
+            root.style.overflow = 'hidden';
+            root.style.position = 'relative';
+
+            root.innerHTML = '<div id="flash-container" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:black;"></div>';
+
+            const container = root.querySelector('#flash-container');
+            if (!container) {
+                return;
+            }
+
+            function resizeGame() {
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                const aspectRatio = 4 / 3;
+
+                let width = Math.floor(windowWidth);
+                let height = Math.floor(windowWidth / aspectRatio);
+
+                if (height > windowHeight) {
+                    height = Math.floor(windowHeight);
+                    width = Math.floor(height * aspectRatio);
+                }
+
+                container.style.width = `${width}px`;
+                container.style.height = `${height}px`;
+            }
+
+            let didLoad = false;
+            function loadFlashGame() {
+                if (didLoad) {
+                    return;
+                }
+                didLoad = true;
+
+                resizeGame();
+
+                const ruffle = window.RufflePlayer?.newest() || window.RufflePlayer?.createPlayer();
+                if (!ruffle) {
+                    container.textContent = 'Ruffle failed to load.';
+                    return;
+                }
+
+                const player = ruffle.createPlayer();
+                player.style.width = '100%';
+                player.style.height = '100%';
+                player.style.background = 'black';
+                container.appendChild(player);
+                player.load(SWF_URL);
+            }
+
+            window.addEventListener('resize', resizeGame);
+
+            if (window.RufflePlayer) {
+                loadFlashGame();
+                return;
+            }
+
+            let ruffleScript = document.getElementById('ruffle-inline-loader');
+            if (!ruffleScript) {
+                ruffleScript = document.createElement('script');
+                ruffleScript.id = 'ruffle-inline-loader';
+                ruffleScript.src = RUFFLE_URL;
+                ruffleScript.onload = loadFlashGame;
+                ruffleScript.onerror = () => {
+                    container.textContent = 'Ruffle failed to load.';
+                };
+                document.head.appendChild(ruffleScript);
+            } else {
+                ruffleScript.addEventListener('load', loadFlashGame, { once: true });
+            }
+        };
+
+                window.inlineGames.driftboss = function (root) {
+                        root.style.padding = '0';
+                        root.style.display = 'block';
+                        root.style.minHeight = '100vh';
+                        root.style.background = '#000';
+
+                        const iframe = document.createElement('iframe');
+                        iframe.title = 'Drift Boss';
+                        iframe.style.width = '100%';
+                        iframe.style.height = '100vh';
+                        iframe.style.border = '0';
+                        iframe.style.display = 'block';
+                        iframe.setAttribute('allow', 'autoplay; fullscreen');
+                        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+
+                        iframe.srcdoc = `<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,maximum-scale=1,user-scalable=0">
+    <title>Drift Boss</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bubbls/ruffle@87ee8bdf0c0a91c39f0fc9375993f5498be7411e/games.css">
+    <style>
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+        #ajaxbar { width: 100vw; height: 100vh; background: none; }
+        #game, #webgl, #orientate, #play { position: absolute; inset: 0; }
+        #game canvas, #webgl canvas { width: 100%; height: 100%; display: block; }
+        #orientate img, #play img { width: 100%; height: 100%; display: block; }
+    </style>
+    <script>
+        window.gadgets = window.gadgets || { util: { runOnLoadHandlers: () => {}, getUrlParameters: () => ({}) }, rpc: { setRelayUrl: () => {} } };
+        window.google = window.google || { csi: { tickDl: () => {} } };
+    <\/script>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/gh/bubbls/ruffle@58de31cc1b4f910a995662c4a2124bc456d46c8b/bossgame.js"><\/script>
+    <div id="ajaxbar">
+        <div id="game"><canvas id="canvas" width="1533" height="960"></canvas></div>
+        <div id="webgl"><canvas id="webglcanvas" width="960" height="601"></canvas></div>
+        <div id="orientate"><img src="" alt=""></div>
+        <div class="play" id="play"><img src="" alt=""></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/gh/st39/sdk@main/api.js"><\/script>
+    <script>
+        try { gadgets.util.runOnLoadHandlers(); } catch (_) {}
+        try { window.google.csi.tickDl(); } catch (_) {}
+    <\/script>
+</body>
+</html>`;
+
+                        root.innerHTML = '';
+                        root.appendChild(iframe);
+                };
+
+                window.inlineGames.drifthunters = function (root) {
+                        root.style.padding = '0';
+                        root.style.display = 'block';
+                        root.style.minHeight = '100vh';
+                        root.style.background = '#000';
+
+                        const iframe = document.createElement('iframe');
+                        iframe.title = 'Drift Hunters';
+                        iframe.style.width = '100%';
+                        iframe.style.height = '100vh';
+                        iframe.style.border = '0';
+                        iframe.style.display = 'block';
+                        iframe.setAttribute('allow', 'autoplay; fullscreen');
+                        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+
+                        iframe.srcdoc = `<!doctype html>
+<html lang="en-us">
+<head>
+    <base href="https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@main/drift-hunters/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Drift Hunters</title>
+    <style>
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+        .webgl-content, #gameContainer, #unityContainer, canvas { width: 100% !important; height: 100% !important; }
+        .webgl-content { position: absolute; inset: 0; }
+    </style>
+</head>
+<body>
+    <div class="webgl-content">
+        <div id="gameContainer" style="width:100%;height:100%;margin:0;"></div>
+    </div>
+    <script src="UnityLoader2019.js"><\/script>
+    <script>
+        if (window.UnityLoader && typeof window.UnityLoader.instantiate === 'function') {
+            window.UnityLoader.instantiate('gameContainer', 'dh.json');
+        }
+    <\/script>
+</body>
+</html>`;
+
+                        root.innerHTML = '';
+                        root.appendChild(iframe);
+                };
+
+                                window.inlineGames.teisei = function (root) {
+                                                root.style.padding = '0';
+                                                root.style.display = 'block';
+                                                root.style.minHeight = '100vh';
+                                                root.style.background = '#000';
+
+                                                const iframe = document.createElement('iframe');
+                                                iframe.title = 'Teisei';
+                                                iframe.style.width = '100%';
+                                                iframe.style.height = '100vh';
+                                                iframe.style.border = '0';
+                                                iframe.style.display = 'block';
+                                                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                                                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+
+                                                iframe.srcdoc = `<!doctype html>
+<html lang="en-us">
+<head>
+    <base href="https://cdn.jsdelivr.net/gh/Stinkalistic/UGS@main/MISC/taisei/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Taisei Project</title>
+    <style>
+        html, body { background-color: #000; height: 100%; margin: 0; padding: 0; }
+        body {
+            background-image: url('background.webp');
+            background-repeat: no-repeat;
+            background-position: 50% 50%;
+            background-size: cover;
+            color: #eee;
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+        .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
+        canvas.emscripten { border: 0; display: block; }
+        .centered {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 50%;
+            transform: translateY(50%);
+            background-color: rgba(0, 0, 0, 0.75);
+            padding: 16px 0;
+            z-index: 1;
+        }
+        #canvasContainer { width: 100%; height: 100%; }
+        #canvas { width: 100% !important; height: 100% !important; }
+        #spinner { overflow: visible; padding-bottom: 16px; text-align: center; }
+        #spinner img { width: 75px; height: 75px; animation: spin .6s linear infinite; }
+        #status { text-align: center; margin-bottom: 8px; }
+        #progress { display: block; margin: 4px auto; width: 240px; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="centered">
+        <div id="spinner"><img src="scythe.webp" alt="loading"></div>
+        <div class="emscripten" id="status">Girls are now downloading, please wait warmly…</div>
+        <progress id="progress" max="100" value="0"></progress>
+        <div id="canvasContainer" hidden><canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas></div>
+    </div>
+    <script>
+        const statusEl = document.getElementById('status');
+        const progressEl = document.getElementById('progress');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const spinner = document.getElementById('spinner');
+        window.Module = {
+            canvas: document.getElementById('canvas'),
+            setStatus: (text) => {
+                if (statusEl) statusEl.textContent = text || '';
+            },
+            monitorRunDependencies: (left) => {
+                if (!progressEl) return;
+                const total = window.Module.totalDependencies || 1;
+                if (left > total) window.Module.totalDependencies = left;
+                const done = Math.max(0, total - left);
+                progressEl.value = total ? Math.min(100, Math.round((done / total) * 100)) : 0;
+                if (left === 0) {
+                    if (spinner) spinner.style.display = 'none';
+                    if (statusEl) statusEl.textContent = '';
+                    if (canvasContainer) canvasContainer.hidden = false;
+                    progressEl.hidden = true;
+                }
+            }
+        };
+    <\/script>
+    <script async src="taisei.js"><\/script>
+</body>
+</html>`;
+
+                                                root.innerHTML = '';
+                                                root.appendChild(iframe);
+                                };
+
+                                                                window.inlineGames.iwbtg = function (root) {
+                                                                                                root.style.padding = '0';
+                                                                                                root.style.display = 'block';
+                                                                                                root.style.minHeight = '100vh';
+                                                                                                root.style.background = '#000';
+
+                                                                                                const iframe = document.createElement('iframe');
+                                                                                                iframe.title = 'IWBTG';
+                                                                                                iframe.style.width = '100%';
+                                                                                                iframe.style.height = '100vh';
+                                                                                                iframe.style.border = '0';
+                                                                                                iframe.style.display = 'block';
+                                                                                                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                                                                                                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+
+                                                                                                iframe.srcdoc = `<!doctype html>
+<html lang="en">
+<head>
+    <base href="https://cdn.jsdelivr.net/gh/Stinkalistic/junk@main/iwbtg/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>I Wanna Be The Guy</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; }
+        body { display: grid; place-items: center; }
+        #MMFCanvas { width: 100%; height: auto; max-width: 1280px; max-height: 100vh; display: block; }
+        #progress-container {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 16px;
+            width: min(520px, calc(100vw - 24px));
+            background: rgba(16, 16, 16, 0.84);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 10px;
+            padding: 10px;
+            font: 14px/1.3 Arial, sans-serif;
+            z-index: 5;
+        }
+        .bar-wrap { width: 100%; background: #444; border-radius: 6px; overflow: hidden; }
+        .bar-fill { height: 10px; width: 0%; transition: width 0.2s; }
+        #download-bar { background: #3b82f6; }
+        #extract-bar { background: #10b981; }
+    </style>
+</head>
+<body>
+    <div style="display:inline-block;-webkit-user-select:none;text-align:left;">
+        <canvas id="MMFCanvas" width="1280" height="720">Your browser does not support Canvas, Please try again.</canvas>
+    </div>
+    <div id="progress-container">
+        <div style="margin-bottom:6px;">Downloading... <span id="download-text">0%</span></div>
+        <div class="bar-wrap"><div id="download-bar" class="bar-fill"></div></div>
+        <div style="margin:12px 0 6px;">Extracting... <span id="extract-text">0%</span></div>
+        <div class="bar-wrap"><div id="extract-bar" class="bar-fill"></div></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>
+    <script src="main.js"><\/script>
+</body>
+</html>`;
+
+                                                                                                root.innerHTML = '';
+                                                                                                root.appendChild(iframe);
+                                                                };
+
+                                                                                                                                window.inlineGames.polytrack = function (root) {
+                                                                                                                                                                                                root.style.padding = '0';
+                                                                                                                                                                                                root.style.display = 'block';
+                                                                                                                                                                                                root.style.minHeight = '100vh';
+                                                                                                                                                                                                root.style.background = '#000';
+
+                                                                                                                                                                                                const iframe = document.createElement('iframe');
+                                                                                                                                                                                                iframe.title = 'Polytrack';
+                                                                                                                                                                                                iframe.style.width = '100%';
+                                                                                                                                                                                                iframe.style.height = '100vh';
+                                                                                                                                                                                                iframe.style.border = '0';
+                                                                                                                                                                                                iframe.style.display = 'block';
+                                                                                                                                                                                                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                                                                                                                                                                                                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+
+                                                                                                                                                                                                iframe.srcdoc = `<!doctype html>
+<html>
+<head>
+    <base href="https://cdn.jsdelivr.net/gh/genizy/polytrack@feb7f045e85fdf07e0d7f7e6d0f08984b9fe20d6/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+    <style>html,body{margin:0;padding:0;background:#000;height:100%;overflow:hidden;}#screen{width:100%;height:100%;display:block;}#ui,#transition-layer{position:fixed;inset:0;pointer-events:none;}</style>
+    <script>
+        const baseHref = document.querySelector('base').href;
+        const NativeWorker = window.Worker;
+        fetch('simulation_worker.bundle.js').then(res => res.text()).then(text => {
+            const blob = new Blob([text.replaceAll('replacethisplease', baseHref)], { type: 'application/javascript' });
+            window.__polytrackWorkerUrl = URL.createObjectURL(blob);
+        }).catch(() => {});
+
+        window.Worker = function (scriptUrl, options) {
+            if (typeof scriptUrl === 'string' && scriptUrl.toLowerCase() === 'simulation_worker.bundle.js' && window.__polytrackWorkerUrl) {
+                return new NativeWorker(window.__polytrackWorkerUrl, options);
+            }
+            return new NativeWorker(scriptUrl, options);
+        };
+        window.Worker.prototype = NativeWorker.prototype;
+
+        const originalFetch = window.fetch;
+        window.fetch = async function (input, init) {
+            if (typeof input === 'string') {
+                input = input.replace('vps.kodub.com', 'vpskodub.tmena1565.workers.dev');
+            } else if (input instanceof Request) {
+                input = new Request(input.url.replace('vps.kodub.com', 'vpskodub.tmena1565.workers.dev'), input);
+            }
+            return originalFetch(input, init);
+        };
+
+        const originalOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+            if (typeof url === 'string') {
+                url = url.replace('vps.kodub.com', 'vpskodub.tmena1565.workers.dev');
+            }
+            return originalOpen.call(this, method, url, ...rest);
+        };
+    <\/script>
+    <script defer src="error_screen.bundle.js"><\/script>
+    <script defer src="main.bundle.js"><\/script>
+</head>
+<body>
+    <canvas id="screen"></canvas>
+    <div id="ui"></div>
+    <div id="transition-layer"></div>
+</body>
+</html>`;
+
+                                                                                                                                                                                                root.innerHTML = '';
+                                                                                                                                                                                                root.appendChild(iframe);
+                                                                                                                                };
+
+                                                                                                                                window.inlineGames.osu = function (root) {
+                                                                                                                                                                                                root.style.padding = '0';
+                                                                                                                                                                                                root.style.display = 'block';
+                                                                                                                                                                                                root.style.minHeight = '100vh';
+                                                                                                                                                                                                root.style.background = '#000';
+
+                                                                                                                                                                                                const iframe = document.createElement('iframe');
+                                                                                                                                                                                                iframe.title = 'osu!';
+                                                                                                                                                                                                iframe.style.width = '100%';
+                                                                                                                                                                                                iframe.style.height = '100vh';
+                                                                                                                                                                                                iframe.style.border = '0';
+                                                                                                                                                                                                iframe.style.display = 'block';
+                                                                                                                                                                                                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                                                                                                                                                                                                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals');
+                                                                                                                                                                                                iframe.src = 'https://cdn.jsdelivr.net/gh/genizy/osu/';
+
+                                                                                                                                                                                                root.innerHTML = '';
+                                                                                                                                                                                                root.appendChild(iframe);
+                                                                                                                                };
+
+                                                                                                                                window.inlineGames.buddy = function (root) {
+                                                                                                                                                                                                root.style.padding = '0';
+                                                                                                                                                                                                root.style.display = 'block';
+                                                                                                                                                                                                root.style.minHeight = '100vh';
+                                                                                                                                                                                                root.style.background = '#000';
+
+                                                                                                                                                                                                const iframe = document.createElement('iframe');
+                                                                                                                                                                                                iframe.title = 'Buddy';
+                                                                                                                                                                                                iframe.style.width = '100%';
+                                                                                                                                                                                                iframe.style.height = '100vh';
+                                                                                                                                                                                                iframe.style.border = '0';
+                                                                                                                                                                                                iframe.style.display = 'block';
+                                                                                                                                                                                                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                                                                                                                                                                                                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+                                                                                                                                                                                                iframe.srcdoc = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><script src="https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle@0.2.0-nightly.2025.10.2/ruffle.min.js"><\/script><style>html,body{margin:0;padding:0;background:#000;overflow:hidden;height:100%;width:100%;}#flash-container{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;}#flash-container ruffle-player{width:100%;height:100%;display:block;background:#000;}</style></head><body><div id="flash-container"></div><script>const container=document.getElementById('flash-container');function resizeGame(){const ww=window.innerWidth,wh=window.innerHeight,ar=5.5/3;let w=Math.floor(ww),h=Math.floor(w/ar);if(h>wh){h=Math.floor(wh);w=Math.floor(h*ar);}container.style.width=w+'px';container.style.height=h+'px';}window.addEventListener('resize',resizeGame);window.addEventListener('DOMContentLoaded',()=>{resizeGame();const ruffle=window.RufflePlayer?.newest()||window.RufflePlayer?.createPlayer();if(ruffle&&container){const player=ruffle.createPlayer();player.style.width='100%';player.style.height='100%';container.appendChild(player);player.load('https://cdn.jsdelivr.net/gh/bubbls/UGS-file-encryption@262af22298788b87a011b3d49f97505dc97cb099/218014_DAbuddy_latest.swf');}else{container.textContent='Ruffle failed to load.';}});<\/script></body></html>`;
+
+                                                                                                                                                                                                root.innerHTML = '';
+                                                                                                                                                                                                root.appendChild(iframe);
+                                                                                                                                };
+
+                                                                                                                                window.inlineGames.pvz = function (root) {
+                                                                                                                                                                                                root.style.padding = '0';
+                                                                                                                                                                                                root.style.display = 'block';
+                                                                                                                                                                                                root.style.minHeight = '100vh';
+                                                                                                                                                                                                root.style.background = '#000';
+
+                                                                                                                                                                                                const iframe = document.createElement('iframe');
+                                                                                                                                                                                                iframe.title = 'PVZ';
+                                                                                                                                                                                                iframe.style.width = '100%';
+                                                                                                                                                                                                iframe.style.height = '100vh';
+                                                                                                                                                                                                iframe.style.border = '0';
+                                                                                                                                                                                                iframe.style.display = 'block';
+                                                                                                                                                                                                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                                                                                                                                                                                                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+                                                                                                                                                                                                iframe.srcdoc = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><script src="https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle@0.2.0-nightly.2025.10.2/ruffle.min.js"><\/script><style>html,body{margin:0;padding:0;background:#000;overflow:hidden;height:100%;width:100%;}#flash-container{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;}#flash-container ruffle-player{width:100%;height:100%;display:block;background:#000;}</style></head><body><div id="flash-container"></div><script>const container=document.getElementById('flash-container');function resizeGame(){const ww=window.innerWidth,wh=window.innerHeight,ar=5.5/3;let w=Math.floor(ww),h=Math.floor(w/ar);if(h>wh){h=Math.floor(wh);w=Math.floor(h*ar);}container.style.width=w+'px';container.style.height=h+'px';}window.addEventListener('resize',resizeGame);window.addEventListener('DOMContentLoaded',()=>{resizeGame();const ruffle=window.RufflePlayer?.newest()||window.RufflePlayer?.createPlayer();if(ruffle&&container){const player=ruffle.createPlayer();player.style.width='100%';player.style.height='100%';container.appendChild(player);player.load('https://cdn.jsdelivr.net/gh/sasa24s/Sphere-compile@95d1d98dc38a920d02e6bbcf61620501b2bacfcb/tables/pvz_9_15.swf');}else{container.textContent='Ruffle failed to load.';}});<\/script></body></html>`;
+
+                                                                                                                                                                                                root.innerHTML = '';
+                                                                                                                                                                                                root.appendChild(iframe);
+                                                                                                                                };
+
         const requestedGameId = (window.location.hash || '#ddlc').replace('#', '').trim() || 'ddlc';
 
         // Any id except "ddlc" uses one-file inline game mode.

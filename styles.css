@@ -950,8 +950,11 @@ body::after {
 .support-panel,
 .notice-admin-panel {
     width: min(920px, 97vw);
+    max-height: min(88vh, 720px);
     min-height: 460px;
     position: relative;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1196,6 +1199,26 @@ body::after {
 
 .notice-admin-view.is-active {
     display: block;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-right: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--accent) 60%, transparent) transparent;
+}
+
+.notice-admin-view.is-active::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notice-admin-view.is-active::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.notice-admin-view.is-active::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--accent) 60%, transparent);
+    border-radius: 999px;
 }
 
 .notice-admin-field {
@@ -1699,4 +1722,102 @@ body::-webkit-scrollbar-thumb:hover {
     .side-menu.side-menu-locked:focus-within {
         background: linear-gradient(180deg, rgba(11, 8, 20, 0.9), rgba(20, 12, 34, 0.86));
     }
+}
+
+/* ── Ticker ─────────────────────────────────────────────────────────────────── */
+.ticker-section {
+    padding: 6px 0 4px;
+}
+
+.ticker-text {
+    margin: 4px 0 0;
+    font-size: 0.82rem;
+    color: var(--text-primary, #e8e0f0);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* ── Featured star ──────────────────────────────────────────────────────────── */
+.featured-star {
+    font-size: 0.78em;
+    vertical-align: middle;
+    margin-left: 2px;
+}
+
+/* ── Admin stats grid ────────────────────────────────────────────────────────── */
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.admin-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(153, 0, 255, 0.2);
+}
+
+.admin-stat-label {
+    font-size: 0.66rem;
+    opacity: 0.6;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.admin-stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent, #9900ff);
+    margin-top: 2px;
+}
+
+/* ── Maintenance overlay ─────────────────────────────────────────────────────── */
+.maintenance-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: color-mix(in srgb, var(--bg-dark, #050006) 94%, transparent);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.maintenance-overlay.visible {
+    display: flex;
+}
+
+.maintenance-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 32px;
+    background: color-mix(in srgb, var(--chrome-mid, rgba(20,12,34,1)) 90%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent, #9900ff) 40%, transparent);
+    border-radius: 20px;
+    max-width: 420px;
+    text-align: center;
+}
+
+.maintenance-icon {
+    font-size: 2.8rem;
+}
+
+.maintenance-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--accent, #9900ff);
+}
+
+.maintenance-message {
+    font-size: 0.95rem;
+    opacity: 0.8;
+    margin: 0;
+    line-height: 1.5;
 }
