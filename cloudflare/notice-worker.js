@@ -9,7 +9,7 @@ const TICKER_KEY = 'ticker';
 const FEATURED_GAME_KEY = 'featured-game';
 const ACTIVE_VISITOR_TTL_SECONDS = 120;
 const DEFAULT_POLL_QUESTION = "What's your fav tool?";
-const DEFAULT_POLL_OPTIONS = ['TuffTerminal', 'WebConsole', 'pr0xy', 'Games'];
+const DEFAULT_POLL_OPTIONS = ['TuffTerminal', 'WebConsole', 'pr0xy', 'Apps'];
 
 function buildCorsHeaders(origin) {
     return {
