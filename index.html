@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Infinite Campus</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        window.GLOBAL_NOTICE_API_URL = 'https://global-notice-worker.bigguy8014.workers.dev/api/global-notice';
+        window.SITE_STATS_API_URL = 'https://global-notice-worker.bigguy8014.workers.dev/api/site-stats';
+        window.SITE_POLL_API_URL = 'https://global-notice-worker.bigguy8014.workers.dev/api/site-poll';
+        window.SITE_POPULAR_APPS_API_URL = 'https://global-notice-worker.bigguy8014.workers.dev/api/popular-apps';
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="particle-layer" aria-hidden="true">
+        <canvas class="particle-constellation-canvas" id="particleConstellation"></canvas>
+        <span class="particle white"></span>
+        <span class="particle purple"></span>
+        <span class="particle white"></span>
+        <span class="particle purple"></span>
+        <span class="particle white"></span>
+        <span class="particle purple"></span>
+        <span class="particle white"></span>
+        <span class="particle purple"></span>
+        <span class="particle white"></span>
+        <span class="particle purple"></span>
+    </div>
+
+    <aside class="side-menu" id="sideMenu" aria-label="Main menu">
+        <h2 class="side-menu-title">Menu</h2>
+        <button class="side-menu-button" id="settingsMenuBtn" type="button">Settings</button>
+        <button class="side-menu-button" id="supportMenuBtn" type="button">Support Me </button>
+    </aside>
+
+    <aside class="stats-panel" id="statsPanel" aria-label="Site stats">
+        <div class="stats-scroll">
+            <div class="stats-section">
+                <span class="stats-label">Online Now</span>
+                <div class="stats-count-row">
+                    <span class="stats-count" id="onlineCount">—</span>
+                    <span class="stats-count-dot" id="onlineCountDot"></span>
+                </div>
+                <span class="stats-sublabel">visitors active</span>
+            </div>
+            <div class="stats-divider" id="tickerDivider" style="display:none;"></div>
+            <div class="stats-section ticker-section" id="tickerSection" style="display:none;" aria-live="polite">
+                <span class="stats-label" style="font-size:0.72rem; opacity:0.65; text-transform:uppercase; letter-spacing:.06em;">📌 Pinned</span>
+                <p class="ticker-text" id="tickerText"></p>
+            </div>
+            <div class="stats-divider"></div>
+            <div class="stats-section">
+                <span class="stats-label">Poll</span>
+                <p class="poll-question" id="pollQuestion">What's your fav tool?</p>
+                <div class="poll-options" id="pollOptions">
+                    <label class="poll-option">
+                        <input type="radio" name="sitePoll" value="0" />
+                        <span class="poll-option-label">TuffTerminal</span>
+                    </label>
+                    <label class="poll-option">
+                        <input type="radio" name="sitePoll" value="1" />
+                        <span class="poll-option-label">WebConsole</span>
+                    </label>
+                    <label class="poll-option">
+                        <input type="radio" name="sitePoll" value="2" />
+                        <span class="poll-option-label">pr0xy</span>
+                    </label>
+                    <label class="poll-option">
+                        <input type="radio" name="sitePoll" value="3" />
+                        <span class="poll-option-label">G4m3s</span>
+                    </label>
+                </div>
+                <button class="poll-vote-btn" id="pollVoteBtn" type="button">Vote</button>
+                <div class="poll-results" id="pollResults" aria-live="polite"></div>
+            </div>
+            <div class="stats-divider"></div>
+            <div class="stats-section">
+                <span class="stats-label">Most Popular Apps This Week</span>
+                <p class="popular-apps-subtext">Ranked by launches this week.</p>
+                <div class="popular-apps-list" id="popularAppsList" aria-live="polite"></div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="global-notice-overlay" id="globalNoticeOverlay" aria-hidden="true">
+        <div class="global-notice-popup" id="globalNoticeBar" role="dialog" aria-modal="true" aria-live="polite" aria-labelledby="globalNoticeLabel">
+            <div class="global-notice-copy">
+                <span class="global-notice-label" id="globalNoticeLabel">Global Notice</span>
+                <span class="global-notice-text" id="globalNoticeText"></span>
+            </div>
+            <button class="global-notice-dismiss" id="globalNoticeDismiss" type="button" aria-label="Dismiss notice">Close</button>
+        </div>
+    </div>
+
+    <button class="notice-admin-icon" id="noticeAdminBtn" type="button" aria-label="Open broadcast admin">B</button>
+
+    <div class="app-shell">
+        <header class="top-bar">
+            <span class="top-bar-title">Olivers Social Studies</span>
+            <div class="top-bar-actions">
+                <button class="top-bar-open-blank" id="openBlankBtn" type="button">Open in about:blank</button>
+                <a href="https://canva.link/w8gcagufe7mlr78" target="_blank" rel="noopener noreferrer"><button class="top-bar-open-blank" type="button">Join the Canva</button></a>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <h1 class="tools-text">Tools😈🧰😼</h1>
+            <h3 class="arch-text">for data saving and basically everything else to work properly i gotta pay for $5 a month for more kv worker storage🫩</h3>
+
+            <section class="glass-panel">
+                <div class="button-row">
+                    <button class="outline-button" data-description="Artificial Intelligence">TuffTerminal</button>
+                    <button class="outline-button" data-description="Web Console">WebConsole</button>
+                    <button class="outline-button" data-description="Web pr0xy">pr0xy (buggy)</button>
+                    <button class="outline-button" data-description="Button 4">4</button>
+                </div>
+                <div class="button-row">
+                    <button class="outline-button" data-description="Button 5">5</button>
+                    <button class="outline-button" data-description="Button 6">6</button>
+                    <button class="outline-button" data-description="Button 7">7</button>
+                    <button class="outline-button" data-description="Button 8">8</button>
+                </div>
+            </section>
+
+            <section class="glass-panel transparent-panel">
+            </section>
+        </main>
+    </div>
+
+    <div class="tooltip-panel" id="tooltipPanel">
+        <span class="tooltip-text" id="tooltipText"></span>
+    </div>
+
+    <div class="settings-overlay" id="settingsOverlay" aria-hidden="true">
+        <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsPanelTitle">
+            <button class="settings-close" id="settingsCloseBtn" type="button" aria-label="Close settings">Close</button>
+            <div class="settings-view is-active" id="settingsMainView">
+                <h2 class="settings-title" id="settingsPanelTitle">Settings</h2>
+                <div class="settings-button-row">
+                    <button class="settings-action-button" id="settingsOpenBlankBtn" type="button" data-description="Open this app inside about:blank">Open in about:blank</button>
+                    <button class="settings-action-button" id="settingsAppearanceBtn" type="button" data-description="change this sites appearence">Appearance</button>
+                    <button class="settings-action-button" id="settingsPrivacyBtn" type="button" data-description="View privacy options">Privacy</button>
+                </div>
+            </div>
+
+            <div class="settings-view" id="appearanceView" aria-hidden="true">
+                <div class="settings-view-header">
+                    <button class="settings-back" id="appearanceBackBtn" type="button">Back</button>
+                </div>
+                <h2 class="settings-title">Appearance</h2>
+                <p class="settings-view-text">coming soon...</p>
+                <div class="theme-swatch-row">
+                    <button class="theme-swatch" type="button" data-theme="default" data-description="Default purple theme">
+                        <span class="theme-swatch-color" style="background: linear-gradient(135deg, #150a24, #9900ff);"></span>
+                        <span class="theme-swatch-label">Default</span>
+                    </button>
+                    <button class="theme-swatch" type="button" data-theme="minty" data-description="Minty green theme">
+                        <span class="theme-swatch-color" style="background: linear-gradient(135deg, #071a10, #3dd68c);"></span>
+                        <span class="theme-swatch-label">Minty</span>
+                    </button>
+                    <button class="theme-swatch" type="button" data-theme="orange" data-description="Burnt orange theme">
+                        <span class="theme-swatch-color" style="background: linear-gradient(135deg, #1a0a00, #ff6a00);"></span>
+                        <span class="theme-swatch-label">Orange</span>
+                    </button>
+                    <button class="theme-swatch" type="button" data-theme="light" data-description="Light theme">
+                        <span class="theme-swatch-color" style="background: linear-gradient(135deg, #e8e8f0, #c0b8d8);"></span>
+                        <span class="theme-swatch-label" style="background: rgba(220,218,230,0.92); color: rgba(0,0,0,0.75); border-top: 1px solid rgba(0,0,0,0.1);">Light</span>
+                    </button>
+                    <button class="theme-swatch" type="button" data-theme="black" data-description="Pure black theme">
+                        <span class="theme-swatch-color" style="background: linear-gradient(135deg, #000000, #111111);"></span>
+                        <span class="theme-swatch-label">Black</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="support-overlay" id="supportOverlay" aria-hidden="true">
+        <div class="support-panel" role="dialog" aria-modal="true" aria-labelledby="supportPanelTitle">
+            <button class="settings-close" id="supportCloseBtn" type="button" aria-label="Close support">Close</button>
+            <h2 class="settings-title" id="supportPanelTitle">Support</h2>
+            <p class="settings-view-text">Send requests or report a bug here.</p>
+            <div class="settings-button-row">
+                <a class="support-action-link settings-action-button" id="supportRequestBtn" href="https://forms.office.com/r/LSFzDSfdHY" target="_blank" rel="noopener noreferrer">req g@m3/bug</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="notice-admin-overlay" id="noticeAdminOverlay" aria-hidden="true">
+        <div class="notice-admin-panel" role="dialog" aria-modal="true" aria-labelledby="noticeAdminTitle">
+            <button class="settings-close" id="noticeAdminCloseBtn" type="button" aria-label="Close broadcast panel">Close</button>
+            <div class="notice-admin-view is-active" id="noticeAdminLoginView">
+                <h2 class="settings-title" id="noticeAdminTitle">Admin Key</h2>
+                <p class="settings-view-text">Key specifically for me only dw abt whats behind this</p>
+                <div class="notice-admin-grid">
+                    <label class="notice-admin-field" for="noticePasswordInput">
+                        <span class="notice-admin-label">Admin Password</span>
+                        <input class="notice-admin-input" id="noticePasswordInput" type="password" autocomplete="current-password" placeholder="Worker admin password" />
+                    </label>
+                </div>
+                <p class="notice-admin-status" id="noticeAdminStatus">Worker endpoint: /api/global-notice</p>
+                <div class="settings-button-row">
+                    <button class="settings-action-button" id="noticeLoginBtn" type="button">Unlock</button>
+                </div>
+            </div>
+            <div class="notice-admin-view" id="noticeAdminComposerView" aria-hidden="true">
+                <div class="settings-view-header">
+                    <button class="settings-back" id="noticeAdminBackBtn" type="button">Back</button>
+                </div>
+                <h2 class="settings-title">Broadcast Notice</h2>
+                <p class="settings-view-text">Publish or clear the live popup shown to everyone on the site.</p>
+                <div class="notice-admin-grid">
+                    <label class="notice-admin-field" for="noticeMessageInput">
+                        <span class="notice-admin-label">Global Message</span>
+                        <textarea class="notice-admin-textarea" id="noticeMessageInput" rows="5" maxlength="280" placeholder="Type the notice you want everyone to see."></textarea>
+                    </label>
+                </div>
+                <p class="notice-admin-status" id="noticeComposerStatus">Worker endpoint: /api/global-notice</p>
+                <div class="settings-button-row">
+                    <button class="settings-action-button" id="noticePublishBtn" type="button">Publish</button>
+                    <button class="settings-action-button" id="noticeClearBtn" type="button">Clear Notice</button>
+                    <button class="settings-action-button" id="noticeRefreshBtn" type="button">Refresh Status</button>
+                </div>
+                <div class="stats-divider" style="margin: 12px 0;"></div>
+                <span class="notice-admin-label" style="font-size: 0.78rem; opacity: 0.7;">Leaderboard</span>
+                <div class="settings-button-row" style="margin-top: 6px;">
+                    <button class="settings-action-button" id="leaderboardResetBtn" type="button">Reset This Week's Leaderboard</button>
+                </div>
+
+                <div class="stats-divider" style="margin: 12px 0;"></div>
+                <span class="notice-admin-label" style="font-size:0.78rem;opacity:0.7;">Poll</span>
+                <p class="settings-view-text" style="margin:4px 0 6px;">Reset all votes, or change the question &amp; options.</p>
+                <div class="settings-button-row" style="margin-top:4px;">
+                    <button class="settings-action-button" id="pollResetBtn" type="button">Reset Poll Votes</button>
+                </div>
+                <div class="notice-admin-grid" style="margin-top:8px;">
+                    <label class="notice-admin-field" for="pollQuestionInput">
+                        <span class="notice-admin-label">Question</span>
+                        <input class="notice-admin-input" id="pollQuestionInput" type="text" maxlength="120" placeholder="What's your fav tool?" />
+                    </label>
+                    <label class="notice-admin-field" for="pollOptionsInput">
+                        <span class="notice-admin-label">Options (one per line, 2–8)</span>
+                        <textarea class="notice-admin-textarea" id="pollOptionsInput" rows="4" placeholder="TuffTerminal&#10;WebConsole&#10;pr0xy&#10;Games"></textarea>
+                    </label>
+                </div>
+                <div class="settings-button-row" style="margin-top:6px;">
+                    <button class="settings-action-button" id="pollUpdateBtn" type="button">Update Poll</button>
+                </div>
+
+                <div class="stats-divider" style="margin: 12px 0;"></div>
+                <span class="notice-admin-label" style="font-size:0.78rem;opacity:0.7;">Pinned Ticker</span>
+                <p class="settings-view-text" style="margin:4px 0 6px;">Shows a pinned message at the top of the stats panel for everyone.</p>
+                <div class="notice-admin-grid" style="margin-top:4px;">
+                    <label class="notice-admin-field" for="tickerInput">
+                        <span class="notice-admin-label">Ticker Message</span>
+                        <input class="notice-admin-input" id="tickerInput" type="text" maxlength="200" placeholder="Type a pinned message..." />
+                    </label>
+                </div>
+                <div class="settings-button-row" style="margin-top:6px;">
+                    <button class="settings-action-button" id="tickerPublishBtn" type="button">Publish Ticker</button>
+                    <button class="settings-action-button" id="tickerClearBtn" type="button">Clear Ticker</button>
+                </div>
+
+                <div class="stats-divider" style="margin: 12px 0;"></div>
+                <span class="notice-admin-label" style="font-size:0.78rem;opacity:0.7;">Featured App ⭐</span>
+                <p class="settings-view-text" style="margin:4px 0 6px;">Puts a ⭐ next to a app in the leaderboard.</p>
+                <div class="notice-admin-grid" style="margin-top:4px;">
+                    <label class="notice-admin-field" for="featuredGameInput">
+                        <span class="notice-admin-label">App Name (exact)</span>
+                        <input class="notice-admin-input" id="featuredGameInput" type="text" maxlength="80" placeholder="e.g. papa's freezeria" />
+                    </label>
+                </div>
+                <div class="settings-button-row" style="margin-top:6px;">
+                    <button class="settings-action-button" id="featuredGameSetBtn" type="button">Set Featured</button>
+                    <button class="settings-action-button" id="featuredGameClearBtn" type="button">Clear Featured</button>
+                </div>
+
+                <div class="stats-divider" style="margin: 12px 0;"></div>
+                <span class="notice-admin-label" style="font-size:0.78rem;opacity:0.7;">Maintenance Mode</span>
+                <p class="settings-view-text" style="margin:4px 0 6px;">Shows a full-screen overlay to everyone. You stay visible.</p>
+                <div class="notice-admin-grid" style="margin-top:4px;">
+                    <label class="notice-admin-field" for="maintenanceMessageInput">
+                        <span class="notice-admin-label">Message (shown on overlay)</span>
+                        <input class="notice-admin-input" id="maintenanceMessageInput" type="text" maxlength="280" placeholder="Site under maintenance. Back soon!" />
+                    </label>
+                </div>
+                <div class="settings-button-row" style="margin-top:6px;">
+                    <button class="settings-action-button" id="maintenanceOnBtn" type="button">Enable Maintenance</button>
+                    <button class="settings-action-button" id="maintenanceOffBtn" type="button">Disable Maintenance</button>
+                </div>
+
+                <div class="stats-divider" style="margin: 12px 0;"></div>
+                <span class="notice-admin-label" style="font-size:0.78rem;opacity:0.7;">Presence</span>
+                <p class="settings-view-text" style="margin:4px 0 6px;">Force the online count back to 0 by clearing ghost visitors.</p>
+                <div class="settings-button-row" style="margin-top:6px;">
+                    <button class="settings-action-button" id="clearPresenceBtn" type="button">Clear All Presence</button>
+                </div>
+
+                <div class="stats-divider" style="margin: 12px 0;"></div>
+                <span class="notice-admin-label" style="font-size:0.78rem;opacity:0.7;">Live Stats</span>
+                <div class="admin-stats-grid" id="adminStatsGrid" style="margin-top:6px;">
+                    <div class="admin-stat-item"><span class="admin-stat-label">Online now</span><span class="admin-stat-value" id="adminOnlineCount">—</span></div>
+                    <div class="admin-stat-item"><span class="admin-stat-label">Poll votes</span><span class="admin-stat-value" id="adminPollVotes">—</span></div>
+                    <div class="admin-stat-item"><span class="admin-stat-label">Launches (wk)</span><span class="admin-stat-value" id="adminLaunches">—</span></div>
+                </div>
+                <div class="settings-button-row" style="margin-top:6px;">
+                    <button class="settings-action-button" id="adminStatsRefreshBtn" type="button">Refresh Stats</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-dock" aria-label="Quick actions">
+        <button class="dock-item" id="partnersDockBtn" type="button" title="Home" data-description="partners">🤝</button>
+        <button class="dock-item" id="gamesDockBtn" type="button" title="Tools" data-description="9@m3z">🎮</button>
+        <button class="dock-item" id="updatesDockBtn" type="button" title="Updates" data-description="updates">✨</button>
+        <button class="dock-item" id="internetDockBtn" type="button" title="Internet" data-description="pr0xy">🌐</button>
+        <button class="dock-item" id="linksDockBtn" type="button" title="Links" data-description="coming soon..">🔗</button>
+    </nav>
+
+    <section class="partners-overlay" id="partnersOverlay" aria-hidden="true">
+        <article class="partners-window" id="partnersWindow" role="dialog" aria-modal="true" aria-labelledby="partnersWindowTitle">
+            <header class="partners-window-header" id="partnersWindowHeader">
+                <h2 class="partners-window-title" id="partnersWindowTitle">Partners</h2>
+                <button class="partners-window-close" id="partnersWindowClose" type="button" aria-label="Close partners window">Close</button>
+            </header>
+            <div class="partners-window-body">
+                <p>one of my favorite sites also owned by my friends cesar and isaac (updated) <a href="https://1.1backup5acc.workers.dev/" target="_blank" rel="noopener noreferrer">bubba inc</a></p>
+                <div>
+                    <p>
+                        julios artificial intelligence <a href="https://1105684-32b352cccb754b40a8d9952383805534-v2-dev.dev.atoms.dev/" target="_blank" rel="noopener noreferrer">july.A1</a>
+                    </p>
+                </div>
+                <div>
+                    <p>
+                    Project EG: <a href="https://canva.link/fzlqyqazpktupqf" target="_blank" rel="noopener noreferrer">join</a>
+                    </p>
+                </div>
+                <div>
+                <p>
+                 Spreadsheet (finally back) <a href="https://docs.google.com/document/d/1-f5--TpK2wFjwl50RkWJd2rYy2fASjnt6T-L4A1ba8E/edit?tab=t.0" target="_blank" rel="noopener noreferrer">click me</a>
+                </p>
+            </div>
+            </div>
+            <div class="partners-window-resize" id="partnersWindowResize" aria-hidden="true"></div>
+        </article>
+    </section>
+
+    <section class="partners-overlay" id="updatesOverlay" aria-hidden="true">
+        <article class="partners-window" id="updatesWindow" role="dialog" aria-modal="true" aria-labelledby="updatesWindowTitle">
+            <header class="partners-window-header" id="updatesWindowHeader">
+                <h2 class="partners-window-title" id="updatesWindowTitle">Updates</h2>
+                <button class="partners-window-close" id="updatesWindowClose" type="button" aria-label="Close updates window">Close</button>
+            </header>
+            <div class="partners-window-body">
+                <p>UPDATE 1.1.1 - Added more g@mes - NEW Pr0xy coming VERY SOON - Partners page - Overall improvements and bug fixes.</p>
+                <div>
+                </div>
+                <p>UPDATE 1.1.2 - Added auto tab cloak</p>
+                <div>
+                </div>
+                <p>UPDATE 2.1 - Added polls - Added most plays leaderboard - Added more admin cmds - also like 4-6 more games</p>
+            </div>
+            <div class="partners-window-resize" id="updatesWindowResize" aria-hidden="true"></div>
+        </article>
+    </section>
+
+    <section class="games-overlay" id="gamesOverlay" aria-hidden="true">
+        <article class="games-window" id="gamesWindow" role="dialog" aria-modal="true" aria-labelledby="gamesWindowTitle">
+            <header class="games-window-header" id="gamesWindowHeader">
+                <div class="games-window-meta">
+                    <h2 class="games-window-title" id="gamesWindowTitle">9@m3z</h2>
+                    <input class="games-window-search" id="gamesSearchInput" type="search" placeholder="Search..." aria-label="Search games" />
+                </div>
+                <div class="games-window-actions">
+                    <button class="games-window-random" id="gamesRandomBtn" type="button" aria-label="Open random game">Random</button>
+                    <button class="games-window-back" id="gamesWindowBack" type="button" aria-label="Back to game list">Back</button>
+                    <button class="games-window-close" id="gamesWindowClose" type="button" aria-label="Close games window">Close</button>
+                </div>
+            </header>
+            <div class="games-window-shell">
+                <aside class="games-menu" aria-label="Games sections">
+                    <button class="games-menu-button" type="button" data-target="games-section-0">0</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-a">a</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-b">b</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-c">c</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-d">d</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-e">e</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-f">f</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-g">g</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-h">h</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-i">i</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-j">j</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-k">k</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-l">l</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-m">m</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-n">n</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-o">o</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-p">p</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-q">q</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-r">r</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-s">s</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-t">t</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-u">u</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-v">v</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-w">w</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-x">x</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-y">y</button>
+                    <button class="games-menu-button" type="button" data-target="games-section-z">z</button>
+                </aside>
+                <div class="games-window-body" id="gamesWindowBody">
+                    <div class="games-search-page" id="gamesSearchPage" aria-hidden="true">
+                        <p class="games-search-title">Search results</p>
+                        <div class="games-search-results" id="gamesSearchResults"></div>
+                    </div>
+                    <iframe class="games-preview-frame" id="gamesPreviewFrame" title="Game preview" loading="lazy"></iframe>
+                    <section class="games-section" id="games-section-0"></section>
+                    <section class="games-section" id="games-section-a"></section>
+                    <section class="games-section" id="games-section-b">
+                        <button class="outline-button" id="buildnow" type="button" data-src="apps.html#buildnow">bu1ldn0w.gg</button>
+                        <button class="outline-button" id="buckshot" type="button" data-src="apps.html#buckshot">bucksh0t r0ul3tt3</button>
+                        <button class="outline-button" id="bendy" type="button" data-src="apps.html#bendy">bendy</button>
+                        <button class="outline-button" id="btd6" type="button" data-src="apps.html#btd6">btd5</button>
+                        <button class="outline-button" id="buddy" type="button" data-src="apps.html#buddy">buddy</button>
+                    </section>
+                    <section class="games-section" id="games-section-c"></section>
+                    <section class="games-section" id="games-section-d">
+                        <button class="outline-button games-test-button" id="ddlc" type="button" data-src="apps.html#ddlc">ddlc</button>
+                        <button class="outline-button" id="driftboss" type="button" data-src="apps.html#driftboss">drift boss</button>
+                        <button class="outline-button" id="drifthunters" type="button" data-src="apps.html#drifthunters">drift hunters</button>
+                    </section>
+                    <section class="games-section" id="games-section-e"></section>
+                    <section class="games-section" id="games-section-f"></section>
+                    <section class="games-section" id="games-section-g">
+                        <button class="outline-button" id="gettingoverit" type="button" data-src="apps.html#gettingoverit">g3tt1ng 0ver 1t</button>
+                    </section>
+                    <section class="games-section" id="games-section-h">
+                        <button class="outline-button" id="silksong" type="button" data-src="apps.html#silksong">h0ll0w kn1ght s1lks0n9</button>
+                    </section>
+                    <section class="games-section" id="games-section-i">
+                        <button class="outline-button" id="iwbtg" type="button" data-src="apps.html#iwbtg">iwbtg</button>
+                    </section>
+                    <section class="games-section" id="games-section-j"></section>
+                    <section class="games-section" id="games-section-k"></section>
+                    <section class="games-section" id="games-section-l"></section>
+                    <section class="games-section" id="games-section-m"></section>
+                    <section class="games-section" id="games-section-n"></section>
+                    <section class="games-section" id="games-section-o">
+                        <button class="outline-button" id="osu" type="button" data-src="apps.html#osu">osu!</button>
+                    </section>
+                    <section class="games-section" id="games-section-p">
+                        <button class="outline-button" id="pizzatower" type="button" data-src="apps.html#pizzatower">pizza tower</button>
+                        <button class="outline-button" id="freezeria" type="button" data-src="apps.html#freezeria">papa's freezeria</button>
+                        <button class="outline-button" id="polytrack" type="button" data-src="apps.html#polytrack">polytrack</button>
+                        <button class="outline-button" id="pvz" type="button" data-src="apps.html#pvz">pvz</button>
+                    </section>
+                    <section class="games-section" id="games-section-q"></section>
+                    <section class="games-section" id="games-section-r"></section>
+                    <section class="games-section" id="games-section-s"></section>
+                    <section class="games-section" id="games-section-t">
+                        <button class="outline-button" id="teisei" type="button" data-src="apps.html#teisei">teisei</button>
+                    </section>
+                    <section class="games-section" id="games-section-u">
+                        <button class="outline-button" id="ultrakill" type="button" data-src="apps.html#ultrakill">uItrak1II</button>
+                        <button class="outline-button" id="goose" type="button" data-src="apps.html#goose">untitled goose game</button>
+                    </section>
+                    <section class="games-section" id="games-section-v"></section>
+                    <section class="games-section" id="games-section-w">
+                        <button class="outline-button" id="webfishing" type="button" data-src="apps.html#webfishing">web fishing</button>
+                    </section>
+                    <section class="games-section" id="games-section-x"></section>
+                    <section class="games-section" id="games-section-y">
+                        <button class="outline-button" id="hustle" type="button" data-src="apps.html#hustle">y0m1 hust13</button>
+                    </section>
+                    <section class="games-section" id="games-section-z"></section>
+                </div>
+            </div>
+            <div class="games-window-resize" id="gamesWindowResize" aria-hidden="true"></div>
+        </article>
+    </section>
+
+    <div class="maintenance-overlay" id="maintenanceOverlay" aria-hidden="true" role="alertdialog" aria-labelledby="maintenanceMsgText">
+        <div class="maintenance-content">
+            <span class="maintenance-icon">🔧</span>
+            <h2 class="maintenance-title">Under Maintenance</h2>
+            <p class="maintenance-message" id="maintenanceMsgText">Back soon!</p>
+            <div class="maintenance-bypass">
+                <button class="maintenance-bypass-toggle" id="maintenanceBypassToggle" type="button">admin?</button>
+                <div class="maintenance-bypass-form" id="maintenanceBypassForm">
+                    <input class="maintenance-bypass-input" id="maintenanceBypassInput" type="password" placeholder="Admin password" autocomplete="current-password" />
+                    <button class="maintenance-bypass-btn" id="maintenanceBypassBtn" type="button">Enter</button>
+                    <span class="maintenance-bypass-error" id="maintenanceBypassError"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
